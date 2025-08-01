@@ -10,7 +10,6 @@ const socket_io_1 = require("socket.io");
 const http_1 = require("http");
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const path_1 = __importDefault(require("path"));
 dotenv_1.default.config();
 const app = (0, express_1.default)();
 const server = (0, http_1.createServer)(app);
@@ -25,11 +24,27 @@ mongoose_1.default.connect(process.env.MONGO_URI || '')
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
-app.use(express_1.default.static('public'));
+if (process.env.NODE_ENV !== 'production') {
+    app.use(express_1.default.static('public'));
+}
 app.use('/auth', auth_1.default);
 app.use('/users', user_1.default);
 app.get('/', (_req, res) => {
-    res.sendFile(path_1.default.join(__dirname, '../public/index.html'));
+    res.json({
+        message: 'LitRPG Unlimited API Server',
+        status: 'running',
+        endpoints: {
+            auth: '/auth',
+            users: '/users'
+        }
+    });
+});
+app.get('/api/health', (_req, res) => {
+    res.json({
+        status: 'healthy',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
 });
 io.on('connection', (socket) => {
     console.log('a user connected');
