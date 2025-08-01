@@ -5,6 +5,7 @@ import { Server as SocketIOServer, Socket } from 'socket.io';
 import { createServer } from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 
 dotenv.config();
 
@@ -26,31 +27,37 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
-// Only serve static files if we're not on Vercel
-if (process.env.NODE_ENV !== 'production') {
-  app.use(express.static('public'));
-}
+// Serve static files from public directory
+app.use(express.static('public'));
 
 // Use routes
 app.use('/auth', authRoutes);
 app.use('/users', userRoutes);
 
+// Serve the main HTML page
 app.get('/', (_req: Request, res: Response) => {
-    res.json({
-        message: 'LitRPG Unlimited API Server',
-        status: 'running',
-        endpoints: {
-            auth: '/auth',
-            users: '/users'
-        }
-    });
+    res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
+// API health check endpoint
 app.get('/api/health', (_req: Request, res: Response) => {
     res.json({
         status: 'healthy',
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development'
+    });
+});
+
+// API server info endpoint
+app.get('/api', (_req: Request, res: Response) => {
+    res.json({
+        message: 'LitRPG Unlimited API Server',
+        status: 'running',
+        endpoints: {
+            auth: '/auth',
+            users: '/users',
+            health: '/api/health'
+        }
     });
 });
 
