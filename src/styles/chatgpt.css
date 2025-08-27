@@ -1,0 +1,150 @@
+/* ChatGPT UI Clone - Exact Styling */
+
+/* Core Layout */
+.chatgpt-container {
+  display: flex;
+  height: 100vh;
+  background-color: #202123;
+  overflow: hidden;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* Sidebar Styling */
+.chatgpt-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  background-color: #171717;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  z-index: 30;
+  transition: width 0.4s ease;
+}
+
+.chatgpt-sidebar.expanded {
+  width: 260px;
+}
+
+.chatgpt-sidebar.collapsed {
+  width: 72px;
+}
+
+/* Main Chat Area */
+.chatgpt-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+  background-color: #202123;
+  transition: margin-left 0.4s ease;
+}
+
+.chatgpt-main.sidebar-expanded {
+  margin-left: 260px;
+  margin-right: 80px;
+}
+
+.chatgpt-main.sidebar-collapsed {
+  margin-left: 72px;
+  margin-right: 80px;
+}
+
+/* Input Container */
+.chatgpt-input-container {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chatgpt-input-container.floating {
+  top: 40%;
+  width: 600px;
+  max-width: 90%;
+}
+
+.chatgpt-input-container.docked {
+  bottom: 24px;
+  width: 680px;
+  max-width: 90%;
+}
+
+/* Input Bar */
+.chatgpt-input {
+  height: 48px;
+  background-color: #2a2a2a;
+  border-radius: 24px;
+  padding: 0 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+/* Chat Bubbles */
+.chatgpt-bubble {
+  max-width: 70%;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.chatgpt-bubble.user {
+  background-color: #343541;
+  color: #ECECEC;
+  margin-left: auto;
+}
+
+.chatgpt-bubble.assistant {
+  background-color: #2a2a2a;
+  color: #ECECEC;
+  margin-right: auto;
+}
+
+/* Typography */
+.chatgpt-welcome {
+  font-size: 24px;
+  font-weight: 500;
+  color: #ECECEC;
+  text-align: center;
+}
+
+/* Suggestions */
+.chatgpt-suggestion {
+  height: 36px;
+  font-size: 14px;
+  color: #C1C1C1;
+  transition: color 0.25s ease;
+}
+
+.chatgpt-suggestion:hover {
+  color: #ECECEC;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Colors */
+:root {
+  --chatgpt-bg: #202123;
+  --chatgpt-sidebar-bg: #171717;
+  --chatgpt-input-bg: #2a2a2a;
+  --chatgpt-text: #ECECEC;
+  --chatgpt-text-muted: #C1C1C1;
+  --chatgpt-purple: #ab68ff;
+  --chatgpt-purple-hover: #9b58ef;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chatgpt-main.sidebar-expanded,
+  .chatgpt-main.sidebar-collapsed {
+    margin-left: 0;
+    margin-right: 0;
+  }
+  
+  .chatgpt-input-container.floating,
+  .chatgpt-input-container.docked {
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+  }
+}

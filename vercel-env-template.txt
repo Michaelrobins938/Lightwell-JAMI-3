@@ -1,0 +1,140 @@
+# ========================================
+# Lightwell Platform - Vercel Environment Variables
+# ========================================
+# Copy these variables to your Vercel dashboard
+# Go to: Project Settings → Environment Variables
+
+# ========================================
+# DATABASE CONFIGURATION
+# ========================================
+# Your actual Neon database
+DATABASE_URL="postgresql://username:password@your-database-host:5432/your-database-name"
+
+# ========================================
+# JWT CONFIGURATION
+# ========================================
+# Generate a secure random string for production
+JWT_SECRET="your-super-secret-jwt-key-here-change-in-production"
+
+# ========================================
+# NEXTAUTH CONFIGURATION
+# ========================================
+# Generate with: openssl rand -base64 32
+NEXTAUTH_SECRET="your-nextauth-secret-key-here"
+# Your production URL
+NEXTAUTH_URL="https://luna-web-psi.vercel.app"
+
+# ========================================
+# GOOGLE OAUTH CONFIGURATION
+# ========================================
+# Get from: https://console.cloud.google.com/apis/credentials
+GOOGLE_CLIENT_ID="your-google-client-id.apps.googleusercontent.com"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# ========================================
+# MICROSOFT AZURE AD OAUTH CONFIGURATION
+# ========================================
+# Your actual Microsoft OAuth credentials
+MICROSOFT_CLIENT_ID="your-microsoft-client-id-here"
+MICROSOFT_CLIENT_SECRET="your-microsoft-client-secret-here"
+MICROSOFT_TENANT_ID="common"
+
+# ========================================
+# AI SERVICES CONFIGURATION
+# ========================================
+# Your actual OpenRouter API
+OPENROUTER_API_KEY="your-openrouter-api-key-here"
+OPENROUTER_API_URL="https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL="openai/gpt-4o-mini"
+
+# Your actual OpenAI API
+OPENAI_API_KEY="your-openai-api-key-here"
+
+# Your actual Google Studio AI API
+GOOGLE_STUDIOSAI_API_KEY="your-google-studios-ai-api-key-here"
+
+# Your actual Gemini API
+GEMINI_API_KEY="your-gemini-api-key-here"
+
+# ========================================
+# VOICE SYNTHESIS CONFIGURATION
+# ========================================
+# Your actual Azure Speech API
+NEXT_PUBLIC_AZURE_SPEECH_API_KEY="your-azure-speech-api-key-here"
+NEXT_PUBLIC_AZURE_SPEECH_REGION="eastus"
+
+# Your actual Cartesia TTS
+CARTESIA_TTS="your-cartesia-tts-api-key-here"
+
+# ========================================
+# STRIPE CONFIGURATION
+# ========================================
+# For payment processing and donations
+STRIPE_SECRET_KEY="sk_test_your-stripe-secret-key-here"
+STRIPE_WEBHOOK_SECRET="whsec_your-webhook-secret-here"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_your-stripe-publishable-key-here"
+
+# ========================================
+# EMAIL CONFIGURATION
+# ========================================
+# For sending emails (password reset, notifications, etc.)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-email-password-or-app-password"
+
+# ========================================
+# APPLICATION CONFIGURATION
+# ========================================
+# Base URL for your application
+NEXT_PUBLIC_BASE_URL="https://luna-web-psi.vercel.app"
+NODE_ENV="production"
+
+# ========================================
+# REDIS CONFIGURATION (Optional)
+# ========================================
+# For caching and session storage (Vercel KV recommended)
+REDIS_URL="redis://username:password@host:port"
+
+# ========================================
+# CRISIS INTERVENTION (Optional)
+# ========================================
+# Emergency contact numbers
+CRISIS_HOTLINE_NUMBER="988"
+EMERGENCY_CONTACTS=["911", "988", "1-800-273-8255"]
+
+# ========================================
+# MONITORING (Optional)
+# ========================================
+# For error tracking and monitoring
+SENTRY_DSN="your-sentry-dsn-here"
+LOG_LEVEL="info"
+
+# ========================================
+# SECURITY (Optional)
+# ========================================
+# Rate limiting
+RATE_LIMIT_WINDOW=60000
+RATE_LIMIT_MAX=100
+CORS_ORIGIN="https://luna-web-psi.vercel.app"
+
+# ========================================
+# PHONE AUTHENTICATION (Optional)
+# ========================================
+# Twilio for SMS verification
+TWILIO_SID="your-twilio-sid"
+TWILIO_TOKEN="your-twilio-token"
+TWILIO_PHONE="+1234567890"
+
+# ========================================
+# ADDITIONAL OAUTH PROVIDERS (Optional)
+# ========================================
+# Apple OAuth
+APPLE_CLIENT_ID="your-apple-client-id"
+APPLE_CLIENT_SECRET="your-apple-client-secret"
+
+# ========================================
+# NEXT.JS PUBLIC KEYS
+# ========================================
+# OpenAI API key for client-side use
+NEXT_PUBLIC_OPENAI_KEY="your-openai-api-key-here"

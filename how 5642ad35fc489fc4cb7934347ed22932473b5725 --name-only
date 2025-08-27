@@ -1,0 +1,9 @@
+[33m9adae98[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Update Luna AI platform with enhanced features and deployment preparation
+[33m1b186e2[m Optimize bundle size: move heavy ML dependencies to optional, simplify analyzeIntent API
+[33m55247a8[m Optimize deployment: reduce bundle size, add Vercel config, optimize webpack
+[33m386d8ef[m Add production environment setup and deployment guide - Create comprehensive env.production.example with all required variables - Add detailed DEPLOYMENT_SETUP.md with Vercel instructions - Include security checklist and troubleshooting guide
+[33m117d5e3[m Fix build issues and prepare for production deployment - Fix TypeScript errors and import paths - Add SSR-safe window usage checks - Update subscription service types to match Prisma schema - Install missing dependencies (core-js, babel-runtime) - All pages now build successfully for Vercel deployment
+[33m958548d[m Complete Luna mental health platform implementation with AI features, database schema, and comprehensive functionality
+[33mc60425e[m Remove .env from git and update .gitignore
+[33m6708849[m Update .gitignore
+[33m5642ad3[m Initial commit

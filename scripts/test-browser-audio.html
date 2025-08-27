@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Pipeline Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status.info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .status.warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 10px 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        
+        .config {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        label {
+            font-weight: bold;
+            display: block;
+            margin: 10px 0 5px 0;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes breathing {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.2); opacity: 1; }
+        }
+        
+        #orbStatus {
+            transition: all 0.3s ease;
+            border-radius: 50px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔊 Audio Pipeline Test</h1>
+        <p>This page tests your fixed audio pipeline with real WebRTC SDP generation.</p>
+        
+        <div class="config">
+            <label for="apiKey">OpenAI API Key:</label>
+            <input type="text" id="apiKey" placeholder="sk-..." value="">
+            
+            <label for="model">Model:</label>
+            <input type="text" id="model" value="gpt-4o-realtime-preview">
+            
+            <label for="voice">Voice:</label>
+            <input type="text" id="voice" value="ember">
+        </div>
+        
+        <div class="status info" id="status">
+            Ready to test audio pipeline
+        </div>
+        
+        <div>
+            <button onclick="testConnection()">🔌 Test Connection</button>
+            <button onclick="testAudioPipeline()">🎵 Test Audio Pipeline</button>
+            <button onclick="testAuthMethods()">🔐 Test Auth Methods</button>
+            <button onclick="testOrbAnimations()">🎨 Test Orb Animations</button>
+            <button onclick="clearLog()">🗑️ Clear Log</button>
+        </div>
+        
+        <div class="status info" id="orbStatus">
+            Orb animations will appear here
+        </div>
+        
+        <div class="log" id="log">Audio pipeline test log will appear here...</div>
+    </div>
+
+    <script>
+        // Simple logging system
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${message}\n`;
+            logElement.textContent += logEntry;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            // Update status
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+            
+            console.log(message);
+        }
+        
+        function clearLog() {
+            document.getElementById('log').textContent = 'Log cleared...\n';
+            document.getElementById('status').textContent = 'Log cleared';
+            document.getElementById('status').className = 'status info';
+        }
+        
+        // Test the connection
+        async function testConnection() {
+            const apiKey = document.getElementById('apiKey').value;
+            const model = document.getElementById('model').value;
+            
+            if (!apiKey) {
+                log('❌ Please enter your OpenAI API key', 'error');
+                return;
+            }
+            
+            log('🔌 Testing OpenAI API connection...', 'info');
+            log(`🔑 API Key format: ${apiKey.substring(0, 10)}...`, 'info');
+            
+            try {
+                // Test models endpoint
+                const response = await fetch('https://api.openai.com/v1/models', {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log(`📡 Response Status: ${response.status} ${response.statusText}`, 'info');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ API connection successful! Found ${data.data.length} models`, 'success');
+                    
+                    // Look for realtime models
+                    const realtimeModels = data.data.filter(m => 
+                        m.id.includes('realtime') || m.id.includes('gpt-4o')
+                    );
+                    
+                    if (realtimeModels.length > 0) {
+                        log('🎯 Realtime models available:', 'success');
+                        realtimeModels.forEach(m => log(`   - ${m.id}`, 'info'));
+                    } else {
+                        log('⚠️ No realtime models found', 'warning');
+                        log('💡 First few available models:', 'info');
+                        data.data.slice(0, 5).forEach(m => log(`   - ${m.id}`, 'info'));
+                    }
+                    
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ API connection failed: ${response.status}`, 'error');
+                    log(`📄 Error details: ${errorText}`, 'error');
+                    
+                    // Provide specific guidance
+                    if (response.status === 401) {
+                        log('💡 401 Unauthorized - This means:', 'warning');
+                        log('   • Your API key is invalid or expired', 'warning');
+                        log('   • You might be using a project key instead of a regular API key', 'warning');
+                        log('   • Check if you need to generate a new API key from OpenAI', 'warning');
+                        log('   • Project keys (sk-proj-) might need different authentication', 'warning');
+                    } else if (response.status === 403) {
+                        log('💡 403 Forbidden - You might not have access to this endpoint', 'warning');
+                    }
+                }
+                
+            } catch (error) {
+                log(`❌ Connection test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test the audio pipeline
+        async function testAudioPipeline() {
+            const apiKey = document.getElementById('apiKey').value;
+            const model = document.getElementById('model').value;
+            const voice = document.getElementById('voice').value;
+            
+            if (!apiKey) {
+                log('❌ Please enter your OpenAI API key', 'error');
+                return;
+            }
+            
+            log('🎵 Testing audio pipeline with WebRTC SDP...', 'info');
+            
+            try {
+                // Create a simple WebRTC peer connection
+                const pc = new RTCPeerConnection({
+                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                });
+                
+                log('✅ WebRTC PeerConnection created', 'success');
+                
+                // Create offer
+                const offer = await pc.createOffer({
+                    offerToReceiveAudio: true,
+                    offerToReceiveVideo: false
+                });
+                
+                log(`✅ WebRTC offer created (${offer.sdp?.length || 0} chars)`, 'success');
+                
+                // Send to OpenAI Realtime
+                log('📤 Sending SDP offer to OpenAI Realtime...', 'info');
+                
+                const response = await fetch(`https://api.openai.com/v1/realtime?model=${model}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/sdp'
+                    },
+                    body: offer.sdp
+                });
+                
+                log(`📡 Response: ${response.status} ${response.statusText}`, 'info');
+                
+                if (response.ok) {
+                    const answerSdp = await response.text();
+                    log(`✅ SDP answer received (${answerSdp.length} chars)`, 'success');
+                    log('🎉 Audio pipeline test successful!', 'success');
+                    
+                    // Try to set the answer
+                    try {
+                        const answer = new RTCSessionDescription({
+                            type: 'answer',
+                            sdp: answerSdp
+                        });
+                        await pc.setRemoteDescription(answer);
+                        log('✅ Remote description set successfully', 'success');
+                    } catch (error) {
+                        log(`⚠️ Could not set remote description: ${error.message}`, 'warning');
+                    }
+                    
+                } else {
+                    const errorText = await response.text();
+                    log(`❌ SDP exchange failed: ${errorText}`, 'error');
+                    
+                    // Provide specific guidance for SDP errors
+                    if (response.status === 401) {
+                        log('💡 401 Unauthorized on SDP exchange:', 'warning');
+                        log('   • Same authentication issue as API test', 'warning');
+                        log('   • Fix the API key first, then retry', 'warning');
+                    } else if (response.status === 400) {
+                        log('💡 400 Bad Request - SDP format issue:', 'warning');
+                        log('   • WebRTC offer might need adjustment', 'warning');
+                        log('   • Check if OpenAI Realtime accepts this SDP format', 'warning');
+                    }
+                }
+                
+                // Cleanup
+                pc.close();
+                
+            } catch (error) {
+                log(`❌ Audio pipeline test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test orb animations and audio processing
+        async function testOrbAnimations() {
+            log('🎨 Testing orb animations and audio processing...', 'info');
+            
+            try {
+                // Simulate audio activity to test orb responsiveness
+                const orbStatus = document.getElementById('orbStatus');
+                
+                // Test 1: Audio volume changes
+                log('🔊 Testing audio volume changes...', 'info');
+                for (let i = 0; i < 5; i++) {
+                    const volume = Math.random() * 0.8 + 0.2;
+                    orbStatus.style.transform = `scale(${1 + volume * 0.5})`;
+                    orbStatus.style.opacity = 0.6 + volume * 0.4;
+                    orbStatus.style.background = `hsl(${200 + volume * 60}, 70%, ${50 + volume * 30}%)`;
+                    
+                    log(`   Volume: ${volume.toFixed(2)}`, 'info');
+                    await new Promise(resolve => setTimeout(resolve, 300));
+                }
+                
+                // Test 2: Audio active state
+                log('🎵 Testing audio active state...', 'info');
+                orbStatus.textContent = '🎵 AUDIO ACTIVE - Orb should be pulsing';
+                orbStatus.style.animation = 'pulse 1s infinite';
+                
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Test 3: Audio received events
+                log('📡 Testing audio_received events...', 'info');
+                orbStatus.textContent = '📡 AUDIO RECEIVED - Orb should be breathing';
+                orbStatus.style.animation = 'breathing 2s infinite';
+                
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                // Reset
+                orbStatus.textContent = '✅ Orb animation tests complete!';
+                orbStatus.style.animation = '';
+                orbStatus.style.transform = '';
+                orbStatus.style.opacity = '';
+                orbStatus.style.background = '';
+                
+                log('✅ Orb animation tests completed successfully!', 'success');
+                
+            } catch (error) {
+                log(`❌ Orb animation test failed: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test different authentication methods
+        async function testAuthMethods() {
+            const apiKey = document.getElementById('apiKey').value;
+            
+            if (!apiKey) {
+                log('❌ Please enter your API key first', 'error');
+                return;
+            }
+            
+            log('🔐 Testing different authentication methods...', 'info');
+            log(`🔑 API Key: ${apiKey.substring(0, 15)}...`, 'info');
+            
+            // Test 1: Standard Bearer token
+            log('\n🧪 Test 1: Standard Bearer Authentication', 'info');
+            try {
+                const response = await fetch('https://api.openai.com/v1/models', {
+                    headers: {
+                        'Authorization': `Bearer ${apiKey}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                log(`📡 Standard Bearer: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                log(`❌ Standard Bearer failed: ${error.message}`, 'error');
+            }
+            
+            // Test 2: Project key format (if it's a project key)
+            if (apiKey.startsWith('sk-proj-')) {
+                log('\n🧪 Test 2: Project Key Authentication', 'info');
+                try {
+                    const response = await fetch('https://api.openai.com/v1/models', {
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json',
+                            'OpenAI-Project': apiKey.split('-')[2] // Extract project ID
+                        }
+                    });
+                    log(`📡 Project Key: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+                } catch (error) {
+                    log(`❌ Project Key failed: ${error.message}`, 'error');
+                }
+            }
+            
+            // Test 3: Different header format
+            log('\n🧪 Test 3: Alternative Header Format', 'info');
+            try {
+                const response = await fetch('https://api.openai.com/v1/models', {
+                    headers: {
+                        'X-OpenAI-API-Key': apiKey,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                log(`📡 X-OpenAI-API-Key: ${response.status} ${response.statusText}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                log(`❌ Alternative header failed: ${error.message}`, 'error');
+            }
+            
+            // Test 4: Check if it's a different API endpoint
+            log('\n🧪 Test 4: Alternative API Endpoints', 'info');
+            
+            const endpoints = [
+                'https://api.openai.com/v1/models',
+                'https://api.openai.com/v1/chat/completions',
+                'https://api.openai.com/v1/audio/speech'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${apiKey}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ model: 'gpt-3.5-turbo', messages: [{ role: 'user', content: 'test' }] })
+                    });
+                    log(`📡 ${endpoint.split('/').pop()}: ${response.status}`, response.ok ? 'success' : 'error');
+                } catch (error) {
+                    log(`❌ ${endpoint.split('/').pop()}: ${error.message}`, 'error');
+                }
+            }
+            
+            log('\n🏁 Authentication tests complete!', 'info');
+            log('💡 Check the results above to see which method works', 'info');
+        }
+        
+        // Auto-fill API key if available
+        window.addEventListener('load', () => {
+            const apiKey = localStorage.getItem('openai_api_key');
+            if (apiKey) {
+                document.getElementById('apiKey').value = apiKey;
+            }
+        });
+        
+        // Save API key to localStorage
+        document.getElementById('apiKey').addEventListener('change', (e) => {
+            localStorage.setItem('openai_api_key', e.target.value);
+        });
+        
+        log('🚀 Audio Pipeline Test Page Loaded', 'success');
+        log('💡 Enter your OpenAI API key and click "Test Connection" to start', 'info');
+    </script>
+</body>
+</html>

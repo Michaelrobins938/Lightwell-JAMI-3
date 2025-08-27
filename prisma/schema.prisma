@@ -1,0 +1,1118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String        @id @default(cuid())
+  email             String        @unique
+  name              String?
+  image             String?
+  phone             String?       @unique
+  password          String?
+  
+  // Enhanced Profile Information
+  profile           UserProfile?
+  
+  // Authentication Metadata
+  emailVerified     DateTime?
+  authProvider      String?       @default("email") // email, google, microsoft, phone
+  
+  // Authorization & Access Control
+  isAdmin           Boolean       @default(false)
+  isCreator         Boolean       @default(false)
+  roles             Json?         // JSON array of user roles
+  
+  // Comprehensive User Preferences
+  preferences       Json?         // Flexible JSON for user preferences
+  
+  // Subscription & Access Control
+  subscriptionTier  String?       @default("free")
+  jamieAccess       Boolean       @default(false)
+  jamieUsageLimit   Int           @default(0)
+  jamieUsageCount   Int           @default(0)
+  jamieResetDate    DateTime?
+
+  // Timestamps
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  // AI Memory and Tracking
+  memories          Memory[]
+  personalityProfiles PersonalityProfile[]
+  aiInteractions    AIInteraction[]
+  
+  // Comprehensive Relations
+  sessions          ChatSession[]
+  conversations     Conversation[]
+  devices           Device[]
+  syncEvents        SyncEvent[]
+  syncConflicts     SyncConflict[]
+  conversationMessages ConversationMessage[]
+  workspaceInvitations WorkspaceInvitation[] @relation("WorkspaceInviter")
+  pluginExecutions  PluginExecution[]
+  pluginUsages      PluginUsage[]
+  serviceWaivers    ServiceWaiver[]
+  hipaaAuditLogs    HIPAAAuditLog[]
+  securityThreatLogs SecurityThreatLog[]
+  securityIncidents SecurityIncident[]
+  dataAccessLogs    DataAccessLog[]
+  personalityUsages PersonalityUsage[]
+  activePersonalities PersonalityProfile[] @relation("ActivePersonality")
+  
+  // Health & Wellness
+  moodEntries       MoodEntry[]
+  sleepEntries      SleepEntry[]
+  exerciseEntries   ExerciseEntry[]
+  journalEntries    JournalEntry[]
+  
+  // Community & Social
+  donations         Donation[]
+  forumPosts        ForumPost[]
+  forumComments     ForumComment[]
+  sharedResources   SharedResource[]
+  resourceRatings   ResourceRating[]
+  supportGroupMeetingsScheduled SupportGroupMeeting[]
+  createdSupportGroups SupportGroup[] @relation("GroupCreator")
+  supportGroupMemberships SupportGroup[] @relation("GroupMembers")
+  
+  // Analytics & Feedback
+  feedback          Feedback[]
+  analyticsEvents   AnalyticsEvent[]
+  userMetrics       UserMetrics[]
+  
+  // Subscriptions
+  userSubscriptions UserSubscription[]
+  subscriptionUsage SubscriptionUsage[] @relation("SubscriptionUsageToUser")
+  
+  // Meditation
+  meditationSessionPlays MeditationSessionPlay[]
+  meditationProgress    MeditationProgress[]
+  meditationRatings     MeditationSessionRating[]
+  
+  // Original Relations
+  accessControl     AccessControl?
+  creatorAccess     CreatorAccess?
+  paymentHistory    PaymentHistory[]
+  teamMemberships   TeamMember[]
+  workspaces        Workspace[]     @relation("WorkspaceOwner")
+  workspaceMemberships WorkspaceMember[]
+}
+
+// Detailed User Profile Model
+model UserProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  user            User      @relation(fields: [userId], references: [id])
+  
+  // Demographic Information
+  dateOfBirth     DateTime?
+  gender          String?
+  nationality     String?
+  language        Json? // Array of languages stored as JSON
+  
+  // Professional Information
+  occupation      String?
+  industry        String?
+  educationLevel  String?
+  
+  // Mental Health & Wellness Tracking
+  mentalHealthGoals String? // JSON array of goals
+  wellnessFocus     Json? // Areas of wellness focus stored as JSON
+  
+  // Therapeutic Preferences
+  therapeuticInterests Json? // Therapy types of interest stored as JSON
+  communicationPreference String? // Preferred communication style
+  
+  // Privacy & Consent
+  dataSharing     Boolean   @default(false)
+  analyticsConsent Boolean  @default(false)
+  
+  // Social & Community
+  communityRoles  Json? // Roles in support communities stored as JSON
+  
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// AI Interaction Tracking
+model AIInteraction {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id])
+  
+  // Interaction Details
+  aiPersonalityId String?
+  aiPersonality   PersonalityProfile? @relation(fields: [aiPersonalityId], references: [id])
+  
+  interactionType String // chat, therapy, coaching, etc.
+  duration        Int     // interaction duration in seconds
+  
+  // Detailed Tracking
+  messageCount    Int     @default(0)
+  sentiment       Float?  // Overall interaction sentiment (-1 to 1)
+  emotionalState  String? // detected emotional state
+  
+  // Outcome Tracking
+  goalProgress    Float?  // Progress towards user's goals
+  insightfulness  Float?  // How insightful the interaction was
+  
+  // Metadata
+  startedAt       DateTime @default(now())
+  endedAt         DateTime?
+  
+  // Compliance & Safety
+  crisisDetected  Boolean  @default(false)
+  safetyInterventions Int  @default(0)
+  
+  @@index([userId, startedAt])
+  @@index([aiPersonalityId])
+}
+
+// Enhanced Memory Model with More Context
+model Memory {
+  id             String @id @default(cuid())
+  userId         String
+  user           User   @relation(fields: [userId], references: [id])
+  
+  // Enhanced Memory Categorization
+  type           String // user_preference, emotional_state, life_event, therapeutic_goal, crisis_history, progress_note, relationship, work_stress, health_concern, coping_strategy
+  subtype        String? // More granular categorization
+  
+  // Rich Memory Content
+  content        String // The actual memory content
+  metadata       Json?  // Flexible metadata storage
+  
+  // Advanced Contextual Tracking
+  importance     Int    @default(5) // 1-10 scale
+  emotionalValence Float @default(0) // -5 to +5 scale with decimal precision
+  
+  // Temporal and Contextual Metadata
+  sourceInteraction String? // ID of AI interaction that generated/related to this memory
+  tags             Json? // More flexible tagging stored as JSON
+  
+  // Advanced Usage Tracking
+  referenceCount Int      @default(0)
+  lastReferenced DateTime @default(now())
+  confidenceScore Float  @default(0.5) // Confidence in memory accuracy
+  
+  // Lifecycle Management
+  isActive       Boolean  @default(true)
+  archivedAt     DateTime?
+  
+  // Timestamps
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([userId, type])
+  @@index([userId, importance])
+  @@index([createdAt])
+  @@index([lastReferenced])
+}
+
+model ChatSession {
+  id          String     @id @default(cuid())
+  title       String?
+  systemPrompt String?
+  model       String?    @default("gpt-4o")
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  user        User       @relation(fields: [userId], references: [id])
+  userId      String
+  messages    Message[]
+}
+
+model Message {
+  id          String       @id @default(cuid())
+  role        String
+  content     String
+  createdAt   DateTime     @default(now())
+  session     ChatSession  @relation(fields: [sessionId], references: [id])
+  sessionId   String
+  attachments Attachment[]
+}
+
+model Attachment {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  fileSize  Int?
+  mimeType  String?
+  message   Message  @relation(fields: [messageId], references: [id])
+  messageId String
+  createdAt DateTime @default(now())
+}
+
+model Conversation {
+  id           String   @id @default(cuid())
+  userId       String
+  content      String
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
+  // Multi-device sync fields
+  syncVersion  Int      @default(1)
+  lastSyncedAt DateTime @default(now())
+  deviceId     String? // Device that last modified this conversation
+  syncStatus   String   @default("synced") // synced, pending, conflicted
+  syncMetadata String? // JSON string for sync metadata
+}
+
+model Device {
+  id         String      @id @default(cuid())
+  userId     String
+  deviceId   String      @unique // Unique device identifier
+  deviceName String // Human-readable device name
+  deviceType String // mobile, desktop, tablet
+  userAgent  String? // Browser/device user agent
+  lastSeen   DateTime    @default(now())
+  isActive   Boolean     @default(true)
+  syncToken  String? // For device-specific sync
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  user       User        @relation(fields: [userId], references: [id])
+  syncEvents SyncEvent[]
+
+  @@unique([userId, deviceId])
+}
+
+model SyncEvent {
+  id           String   @id @default(cuid())
+  userId       String
+  deviceId     String
+  eventType    String // message_sent, message_edited, conversation_created, etc.
+  resourceType String // conversation, message, settings
+  resourceId   String // ID of the affected resource
+  eventData    String // JSON string with event details
+  timestamp    DateTime @default(now())
+  syncVersion  Int      @default(1)
+  isProcessed  Boolean  @default(false)
+  device       Device   @relation(fields: [deviceId], references: [id])
+  user         User     @relation(fields: [userId], references: [id])
+
+  @@index([userId, timestamp])
+  @@index([resourceType, resourceId])
+}
+
+model ConversationMessage {
+  id             String    @id @default(cuid())
+  conversationId String
+  userId         String
+  role           String // user, assistant, system
+  content        String
+  metadata       String? // JSON string for additional data
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  // Multi-device sync fields
+  syncVersion    Int       @default(1)
+  deviceId       String? // Device that created this message
+  lastEditedAt   DateTime  @default(now())
+  lastEditedBy   String? // Device that last edited this message
+  isDeleted      Boolean   @default(false)
+  deletedAt      DateTime?
+  deletedBy      String? // Device that deleted this message
+  user           User      @relation(fields: [userId], references: [id])
+}
+
+model SyncConflict {
+  id           String    @id @default(cuid())
+  userId       String
+  resourceType String // conversation, message, settings
+  resourceId   String // ID of the conflicted resource
+  deviceId1    String // First device involved in conflict
+  deviceId2    String // Second device involved in conflict
+  version1     Int // Version from device 1
+  version2     Int // Version from device 2
+  data1        String // JSON data from device 1
+  data2        String // JSON data from device 2
+  resolution   String? // manual, auto_merge, device1_wins, device2_wins
+  resolvedAt   DateTime?
+  resolvedBy   String? // Device that resolved the conflict
+  createdAt    DateTime  @default(now())
+  user         User      @relation(fields: [userId], references: [id])
+
+  @@index([userId, resourceType, resourceId])
+}
+
+model MoodEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  mood      Int // Changed from 'level' to 'mood' to match API usage
+  energy    Int? // 1-10 scale
+  anxiety   Int? // 1-10 scale
+  notes     String?
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model SleepEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  hours     Float
+  quality   Int // 1-10 scale
+  notes     String?
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model ExerciseEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String // e.g., "cardio", "strength", "yoga"
+  duration  Int // in minutes
+  intensity Int // 1-10 scale
+  calories  Int?
+  notes     String?
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model JournalEntry {
+  id        String   @id @default(cuid())
+  userId    String
+  content   String
+  prompt    String? // Added to match API usage
+  mood      Int? // Mood level 1-10
+  tags      String? // JSON string for tags array
+  date      DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model Donation {
+  id              String   @id @default(cuid())
+  userId          String
+  amount          Float
+  currency        String   @default("USD")
+  stripeSessionId String   @unique
+  status          String
+  isMonthly       Boolean  @default(false)
+  user            User     @relation(fields: [userId], references: [id])
+}
+
+model ForumPost {
+  id        String         @id @default(cuid())
+  content   String
+  tags      String
+  authorId  String
+  author    User           @relation(fields: [authorId], references: [id])
+  comments  ForumComment[]
+}
+
+model ForumComment {
+  id        String    @id @default(cuid())
+  content   String
+  authorId  String
+  author    User      @relation(fields: [authorId], references: [id])
+  postId    String
+  post      ForumPost @relation(fields: [postId], references: [id])
+}
+
+model SharedResource {
+  id            String           @id @default(cuid())
+  url           String
+  type          String           @default("article") // article, video, tool, guide
+  tags          String // JSON string for tags array
+  averageRating Float            @default(0)
+  isFeatured    Boolean          @default(false)
+  downloadCount Int              @default(0)
+  userId        String
+  author        User             @relation(fields: [userId], references: [id])
+  ratings       ResourceRating[]
+}
+
+model ResourceRating {
+  id         String         @id @default(cuid())
+  rating     Int
+  userId     String
+  user       User           @relation(fields: [userId], references: [id])
+  resourceId String
+  resource   SharedResource @relation(fields: [resourceId], references: [id])
+
+  @@unique([resourceId, userId])
+}
+
+model SupportGroup {
+  id          String                @id @default(cuid())
+  name        String
+  tags        String // JSON string for tags array
+  category    String                @default("general") // anxiety, depression, trauma, addiction, grief, general
+  isPrivate   Boolean               @default(false)
+  maxMembers  Int? // Optional member limit
+  creatorId   String
+  creator     User                  @relation("GroupCreator", fields: [creatorId], references: [id])
+  members     User[]                @relation("GroupMembers")
+  meetings    SupportGroupMeeting[]
+}
+
+model SupportGroupMeeting {
+  id                  String       @id @default(cuid())
+  startTime           DateTime
+  duration            Int
+  videoConferenceLink String
+  groupId             String
+  group               SupportGroup @relation(fields: [groupId], references: [id])
+  schedulerId         String
+  scheduler           User         @relation(fields: [schedulerId], references: [id])
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+}
+
+model Feedback {
+  id        String   @id @default(cuid())
+  userId    String
+  rating    Int
+  comment   String?
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+// Analytics event model for tracking user interactions
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  userId     String? // Optional for anonymous tracking
+  event      String // Event name
+  category   String? // Event category
+  properties String? // JSON string for event properties
+  sessionId  String? // Session tracking
+  userAgent  String? // Browser info
+  ipAddress  String? // IP address
+  timestamp  DateTime @default(now())
+  user       User?    @relation(fields: [userId], references: [id])
+}
+
+model UserMetrics {
+  id                   String   @id @default(cuid())
+  userId               String
+  date                 DateTime // Date for the metrics (daily aggregation)
+  moodEntries          Int      @default(0)
+  sleepEntries         Int      @default(0)
+  assessmentsCompleted Int      @default(0)
+  therapySessions      Int      @default(0)
+  therapyMinutes       Int      @default(0)
+  pageViews            Int      @default(0)
+  timeSpent            Int      @default(0) // in minutes
+  lastActivity         DateTime @default(now())
+  user                 User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, date])
+}
+
+model UserSubscription {
+  id                   String              @id @default(cuid())
+  userId               String
+  tierId               String
+  status               String              @default("active") // active, canceled, past_due, unpaid
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean             @default(false)
+  stripeSubscriptionId String?
+  stripeCustomerId     String
+  usage                String // JSON string for usage data
+  user                 User                @relation(fields: [userId], references: [id])
+  tier                 SubscriptionTier    @relation(fields: [tierId], references: [id])
+  usageLogs            SubscriptionUsage[] @relation("SubscriptionUsageToSubscription")
+  payments             PaymentHistory[]
+
+  @@unique([userId])
+}
+
+model SubscriptionUsage {
+  id                      String           @id @default(cuid())
+  userId                  String
+  subscriptionId          String // Add separate field for subscription reference
+  tierId                  String
+  date                    DateTime
+  aiFeaturesUsed          Int              @default(0)
+  therapistSessionsUsed   Int              @default(0)
+  crisisInterventionsUsed Int              @default(0)
+  subscription            UserSubscription @relation("SubscriptionUsageToSubscription", fields: [subscriptionId], references: [userId])
+  tier                    SubscriptionTier @relation(fields: [tierId], references: [id])
+  user                    User             @relation("SubscriptionUsageToUser", fields: [userId], references: [id])
+}
+
+model PaymentHistory {
+  id                    String           @id @default(cuid())
+  userId                String
+  subscriptionId        String
+  amount                Float
+  currency              String           @default("USD")
+  status                String // succeeded, pending, failed
+  stripePaymentIntentId String
+  subscription          UserSubscription @relation(fields: [subscriptionId], references: [id])
+  user                  User             @relation(fields: [userId], references: [id])
+}
+
+model EnterpriseSubscription {
+  id                   String   @id @default(cuid())
+  organizationId       String   @unique
+  organizationName     String
+  tierId               String
+  userCount            Int
+  customFeatures       String // JSON string for custom features array
+  whiteLabelConfig     String // JSON string for white label configuration
+  adminUsers           String // JSON string for admin users array
+  billingContact       String // JSON string for billing contact
+  status               String   @default("pending") // active, pending, suspended
+  stripeSubscriptionId String?
+}
+
+// Meditation Models
+model MeditationCategory {
+  id          String              @id @default(cuid())
+  name        String              @unique
+  description String?             // Added description field
+  sessions    MeditationSession[]
+}
+
+model MeditationInstructor {
+  id          String              @id @default(cuid())
+  name        String              @unique
+  credentials String?
+  bio         String?
+  avatar      String?
+  sessions    MeditationSession[]
+}
+
+model MeditationSession {
+  id            String                    @id @default(cuid())
+  title         String?                   // Added title field
+  duration      Int // in minutes
+  difficulty    String // beginner, intermediate, advanced
+  thumbnailUrl  String?
+  audioUrl      String
+  averageRating Float                     @default(0)
+  isActive      Boolean                   @default(true)
+  userId        String? // Creator of the session
+  categoryId    String
+  category      MeditationCategory        @relation(fields: [categoryId], references: [id])
+  instructorId  String
+  instructor    MeditationInstructor      @relation(fields: [instructorId], references: [id])
+  tags          MeditationSessionTag[]
+  plays         MeditationSessionPlay[]
+  progress      MeditationProgress[]
+  ratings       MeditationSessionRating[]
+}
+
+model MeditationSessionTag {
+  sessionId String
+  tagId     String
+  session   MeditationSession @relation(fields: [sessionId], references: [id])
+  tag       MeditationTag     @relation(fields: [tagId], references: [id])
+
+  @@id([sessionId, tagId])
+}
+
+model MeditationTag {
+  id        String                 @id @default(cuid())
+  name      String                 @unique
+  sessions  MeditationSessionTag[]
+}
+
+model MeditationSessionPlay {
+  id        String            @id @default(cuid())
+  sessionId String
+  userId    String
+  playedAt  DateTime          @default(now())
+  duration  Int // How long they played in seconds
+  session   MeditationSession @relation(fields: [sessionId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
+}
+
+model MeditationProgress {
+  id          String            @id @default(cuid())
+  userId      String
+  sessionId   String
+  completedAt DateTime          @default(now())
+  duration    Int // How long they completed in seconds
+  rating      Int? // 1-5 rating
+  notes       String?
+  user        User              @relation(fields: [userId], references: [id])
+  session     MeditationSession @relation(fields: [sessionId], references: [id])
+
+  @@unique([userId, sessionId])
+}
+
+model MeditationSessionRating {
+  id        String            @id @default(cuid())
+  sessionId String
+  userId    String
+  rating    Int // 1-5 rating
+  comment   String?
+  session   MeditationSession @relation(fields: [sessionId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
+
+  @@unique([sessionId, userId])
+}
+
+// Personality System Models
+model PersonalityProfile {
+  id                  String  @id @default(cuid())
+  userId              String
+  name                String
+  isActive            Boolean @default(false)
+  isDefault           Boolean @default(false)
+  isSystem            Boolean @default(false) // System-provided personalities
+  category            String // therapeutic, coaching, educational, etc.
+  therapeuticApproach String? // CBT, DBT, ACT, etc.
+  specialization      String? // anxiety, depression, trauma, etc.
+
+  // Core Personality Configuration
+  coreInstructions      String // Main personality instructions
+  safetyProtocols       String // Safety and crisis protocols
+  therapeuticTechniques String? // Specific techniques to use
+  boundarySettings      String? // Professional boundaries
+  crisisIntervention    String? // Crisis detection and response
+
+  // Advanced Configuration
+  communicationStyle String? // warm, professional, direct, etc.
+  responseLength     String? // concise, detailed, etc.
+  empathyLevel       String? // high, moderate, low
+  directiveLevel     String? // directive, non-directive, collaborative
+
+  // Safety & Compliance
+  safetyChecks        String? // JSON array of safety check prompts
+  crisisKeywords      String? // JSON array of crisis detection keywords
+  escalationProtocols String? // When to escalate to human help
+  disclaimers         String? // Required disclaimers and limitations
+
+  // Metadata
+  version          String    @default("1.0")
+  lastReviewed     DateTime?
+  complianceStatus String    @default("pending") // pending, approved, flagged
+  usageCount       Int       @default(0)
+  averageRating    Float     @default(0)
+
+
+  // Relations
+  user           User               @relation(fields: [userId], references: [id])
+  activeForUsers User[]             @relation("ActivePersonality")
+  usage          PersonalityUsage[]
+  aiInteractions AIInteraction[]
+
+  @@unique([userId, name])
+}
+
+model PersonalityUsage {
+  id                  String    @id @default(cuid())
+  userId              String
+  personalityId       String
+  sessionId           String?
+  startedAt           DateTime  @default(now())
+  endedAt             DateTime?
+  duration            Int? // Duration in seconds
+  messageCount        Int       @default(0)
+  crisisDetected      Boolean   @default(false)
+  escalationTriggered Boolean   @default(false)
+  userSatisfaction    Int? // 1-5 rating
+  feedback            String?
+
+
+  user        User               @relation(fields: [userId], references: [id])
+  personality PersonalityProfile @relation(fields: [personalityId], references: [id])
+}
+
+// System Default Personalities
+model SystemPersonality {
+  id                  String  @id @default(cuid())
+  name                String  @unique
+  displayName         String
+  category            String
+  therapeuticApproach String?
+  specialization      String?
+
+  // Core Configuration
+  coreInstructions      String
+  safetyProtocols       String
+  therapeuticTechniques String?
+  boundarySettings      String?
+  crisisIntervention    String?
+
+  // Advanced Configuration
+  communicationStyle String?
+  responseLength     String?
+  empathyLevel       String?
+  directiveLevel     String?
+
+  // Safety & Compliance
+  safetyChecks        String?
+  crisisKeywords      String?
+  escalationProtocols String?
+  disclaimers         String?
+
+  // Metadata
+  version       String  @default("1.0")
+  isActive      Boolean @default(true)
+  isRecommended Boolean @default(false)
+  usageCount    Int     @default(0)
+  averageRating Float   @default(0)
+
+}
+
+// Team and Workspace System for Collaboration
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  avatar      String?
+
+  // Relations
+  members     TeamMember[]
+  workspaces  Workspace[]
+  invitations TeamInvitation[]
+
+}
+
+model TeamMember {
+  id       String   @id @default(cuid())
+  teamId   String
+  userId   String
+  role     String   @default("member") // owner, admin, member, viewer
+  joinedAt DateTime @default(now())
+
+  // Relations
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+  @@index([teamId])
+}
+
+model TeamInvitation {
+  id        String   @id @default(cuid())
+  teamId    String
+  email     String
+  role      String   @default("member")
+  token     String   @unique
+
+  // Relations
+  team Team @relation(fields: [teamId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([token])
+}
+
+model Workspace {
+  id          String   @id @default(cuid())
+  name        String
+  teamId      String?
+  ownerId     String
+
+  // Relations
+  team          Team?                 @relation(fields: [teamId], references: [id], onDelete: SetNull)
+  owner         User                  @relation("WorkspaceOwner", fields: [ownerId], references: [id])
+  members       WorkspaceMember[]
+  invitations   WorkspaceInvitation[]
+
+  @@index([teamId])
+  @@index([ownerId])
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userId      String
+  role        String   @default("member") // owner, admin, member, viewer
+  joinedAt    DateTime @default(now())
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+  @@index([workspaceId])
+}
+
+model WorkspaceInvitation {
+  id          String   @id @default(cuid())
+  workspaceId String
+  email       String
+  role        String   @default("member")
+  invitedBy   String
+  status      String   @default("pending") // pending, accepted, expired, declined
+
+  // Relations
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  inviter   User      @relation("WorkspaceInviter", fields: [invitedBy], references: [id])
+
+  @@index([workspaceId])
+  @@index([email])
+  @@index([status])
+}
+
+// Plugin System for External Integrations
+model Plugin {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  displayName String
+  version     String   @default("1.0.0")
+  author      String?
+  icon        String?
+  isEnabled   Boolean  @default(true)
+  isSystem    Boolean  @default(false) // System plugins vs user plugins
+  config      String? // JSON configuration
+
+  // Relations
+  actions PluginAction[]
+  usage   PluginUsage[]
+
+  @@index([isEnabled])
+  @@index([isSystem])
+}
+
+model PluginAction {
+  id          String   @id @default(cuid())
+  pluginId    String
+  name        String
+  displayName String
+  endpoint    String // API endpoint or action identifier
+  method      String   @default("GET") // HTTP method for API calls
+  parameters  String? // JSON schema for parameters
+  headers     String? // JSON for required headers
+  authType    String   @default("none") // none, api_key, oauth, bearer
+  isEnabled   Boolean  @default(true)
+
+  // Relations
+  plugin     Plugin            @relation(fields: [pluginId], references: [id], onDelete: Cascade)
+  executions PluginExecution[]
+
+  @@unique([pluginId, name])
+  @@index([isEnabled])
+}
+
+model PluginExecution {
+  id             String    @id @default(cuid())
+  actionId       String
+  userId         String
+  status         String    @default("pending") // pending, running, completed, failed
+  parameters     String? // JSON parameters used
+  result         String? // JSON result or error
+  error          String? // Error message if failed
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
+  duration       Int? // Duration in milliseconds
+
+  // Relations
+  action       PluginAction @relation(fields: [actionId], references: [id])
+  user         User         @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@index([startedAt])
+}
+
+model PluginUsage {
+  id       String   @id @default(cuid())
+  pluginId String
+  userId   String
+  actionId String?
+  count    Int      @default(1)
+  lastUsed DateTime @default(now())
+
+  // Relations
+  plugin Plugin @relation(fields: [pluginId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@unique([pluginId, userId, actionId])
+  @@index([userId])
+  @@index([lastUsed])
+}
+
+// New models for enhanced subscription system
+model SubscriptionTier {
+  id                  String   @id @default(cuid())
+  name                String   @unique // free, basic, premium, enterprise
+  displayName         String
+  price               Float    @default(0.00)
+  currency            String   @default("USD")
+  billingCycle        String   @default("monthly") // monthly, yearly
+  features            String // JSON string for features array
+  limits              String // JSON string for usage limits
+  jamieAccess         Boolean  @default(false)
+  jamieUsageLimit     Int      @default(0)
+  jamieResetFrequency String   @default("monthly") // daily, weekly, monthly, yearly
+  isActive            Boolean  @default(true)
+
+  // Relations
+  subscriptions UserSubscription[]
+  usageLogs     SubscriptionUsage[]
+}
+
+model AccessControl {
+  id         String    @id @default(cuid())
+  userId     String    @unique
+  feature    String // jamie, premium_features, etc.
+  isEnabled  Boolean   @default(false)
+  usageLimit Int       @default(0)
+  usageCount Int       @default(0)
+  resetDate  DateTime  @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CreatorAccess {
+  id          String    @id @default(cuid())
+  userId      String    @unique
+  permissions String // JSON string for permissions array
+  isActive    Boolean   @default(true)
+  grantedBy   String? // Admin who granted access
+  grantedAt   DateTime  @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ServiceWaiver {
+  id               String   @id @default(cuid())
+  userId           String? // Optional for anonymous waivers
+  fullName         String
+  email            String
+  dateOfBirth      DateTime
+  emergencyContact String?
+  emergencyPhone   String?
+  signature        String
+  signedAt         DateTime @default(now())
+  ipAddress        String?
+  userAgent        String?
+  termsAccepted    String // JSON string for accepted terms
+  isActive         Boolean  @default(true)
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([signedAt])
+  @@index([isActive])
+}
+
+// HIPAA Compliance and Security Models
+
+model HIPAAAuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String // What action was performed
+  resource  String // What resource was accessed
+  timestamp DateTime @default(now())
+  ipAddress String
+  userAgent String
+  success   Boolean // Whether the action was successful
+  details   String // JSON string with additional details
+  hash      String // Cryptographic hash for integrity verification
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, timestamp])
+  @@index([action, timestamp])
+  @@index([resource, timestamp])
+}
+
+model SecurityThreatLog {
+  id         String   @id @default(cuid())
+  userId     String
+  threatType String // Type of threat detected
+  severity   String // low, medium, high, critical
+  confidence Float // Confidence score (0.0 - 1.0)
+  details    String // JSON string with threat details
+  ipAddress  String
+  userAgent  String
+  timestamp  DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, timestamp])
+  @@index([threatType, timestamp])
+  @@index([severity, timestamp])
+}
+
+model SecurityIncident {
+  id              String    @id @default(cuid())
+  userId          String?
+  incidentType    String // Type of security incident
+  severity        String // low, medium, high, critical
+  status          String    @default("open") // open, investigating, resolved, closed
+  detectedAt      DateTime  @default(now())
+  resolvedAt      DateTime?
+  mitigationSteps String // JSON string with mitigation steps
+  affectedData    String? // JSON string describing affected data
+
+  // Relations
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId, detectedAt])
+  @@index([incidentType, detectedAt])
+  @@index([status, detectedAt])
+}
+
+model DataAccessLog {
+  id         String   @id @default(cuid())
+  userId     String
+  dataType   String // Type of data accessed
+  accessType String // read, write, delete, export
+  timestamp  DateTime @default(now())
+  ipAddress  String
+  userAgent  String
+  success    Boolean
+  details    String? // JSON string with additional details
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, timestamp])
+  @@index([dataType, timestamp])
+  @@index([accessType, timestamp])
+}
+
+model EncryptionKey {
+  id           String    @id @default(cuid())
+  keyId        String    @unique // Unique identifier for the key
+  keyType      String // master, user, field, session
+  encryptedKey String // The encrypted key data
+  salt         String // Salt used for key derivation
+  iv           String // Initialization vector
+  authTag      String // Authentication tag
+  algorithm    String // Encryption algorithm used
+  keySize      Int // Key size in bits
+  isActive     Boolean   @default(true)
+
+  @@index([keyType, isActive])
+}
+
+model SecurityPolicy {
+  id          String   @id @default(cuid())
+  policyName  String   @unique
+  rules       String // JSON string with policy rules
+  isActive    Boolean  @default(true)
+
+  @@index([isActive])
+}
+
+model ComplianceReport {
+  id              String   @id @default(cuid())
+  reportType      String // hipaa, gdpr, sox, etc.
+  reportDate      DateTime @default(now())
+  status          String // compliant, non_compliant, needs_review
+  summary         String
+  details         String // JSON string with detailed findings
+  recommendations String // JSON string with recommendations
+  nextReviewDate  DateTime
+
+  @@index([reportType, reportDate])
+  @@index([status, reportDate])
+}
+
+// Simple model for voice chat history
+model ChatHistory {
+  id        String   @id @default(cuid())
+  userId    String
+  messages  Json // stores full chat log (can include text + metadata)
+  summary   String? // auto-generated summary
+
+}

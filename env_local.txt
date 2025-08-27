@@ -1,0 +1,21 @@
+# Google OAuth Configuration
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your-google-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your_google_client_secret_here
+
+# Microsoft OAuth Configuration
+MICROSOFT_CLIENT_ID=your-microsoft-client-id-here
+MICROSOFT_CLIENT_SECRET=your-microsoft-client-secret-here
+MICROSOFT_TENANT_ID=common
+
+# NextAuth Configuration
+NEXTAUTH_SECRET=your-nextauth-secret-key-change-this-in-production
+NEXTAUTH_URL=http://localhost:3005
+
+# Database
+DATABASE_URL="file:./prisma/dev.db"
+
+# JWT Secret
+JWT_SECRET=super-secure-jwt-secret-for-development-only-change-in-production-2024
+
+# OpenAI API Key
+OPENAI_API_KEY=your_openai_api_key_here

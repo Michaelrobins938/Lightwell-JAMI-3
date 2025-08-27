@@ -1,0 +1,104 @@
+syntax = "proto3";
+
+package chatgpt.desktop.voice;
+
+import "google/protobuf/timestamp.proto";
+
+// Voice personality configuration
+message VoicePersonality {
+  string voice_id = 1;
+  string name = 2;
+  string description = 3;
+  string gender = 4;
+  int32 age = 5;
+  string accent = 6;
+  string language = 7;
+  float speaking_rate = 8;
+  float pitch = 9;
+  float volume = 10;
+  map<string, string> voice_characteristics = 11;
+}
+
+// Voice session configuration
+message VoiceSessionConfig {
+  string session_id = 1;
+  VoicePersonality personality = 2;
+  string audio_format = 3;
+  int32 sample_rate = 4;
+  int32 bit_depth = 5;
+  int32 channels = 6;
+  bool noise_reduction = 7;
+  bool echo_cancellation = 8;
+  float silence_threshold = 9;
+  int32 max_duration_seconds = 10;
+}
+
+// Audio input processing
+message AudioInput {
+  string session_id = 1;
+  bytes audio_data = 2;
+  int64 timestamp = 3;
+  int32 sample_rate = 4;
+  int32 bit_depth = 5;
+  int32 channels = 6;
+  bool is_final_chunk = 7;
+  float confidence = 8;
+  map<string, string> metadata = 9;
+}
+
+// Audio output generation
+message AudioOutput {
+  string session_id = 1;
+  bytes audio_data = 2;
+  int64 timestamp = 3;
+  string text_content = 4;
+  float confidence = 5;
+  bool is_complete = 6;
+  VoicePersonality personality = 7;
+  map<string, string> metadata = 8;
+}
+
+// Voice command recognition
+message VoiceCommand {
+  string session_id = 1;
+  string command_text = 2;
+  string command_type = 3;  // "navigation", "action", "query"
+  float confidence = 4;
+  map<string, string> parameters = 5;
+  int64 timestamp = 6;
+}
+
+// Voice session status
+message VoiceSessionStatus {
+  string session_id = 1;
+  string status = 2;  // "active", "paused", "stopped", "error"
+  VoicePersonality current_personality = 3;
+  int64 duration_seconds = 4;
+  int64 audio_processed_bytes = 5;
+  string error_message = 6;
+  int64 last_activity = 7;
+}
+
+// Voice settings and preferences
+message VoicePreferences {
+  string user_id = 1;
+  string default_voice_id = 2;
+  float default_volume = 3;
+  float default_speaking_rate = 4;
+  bool auto_start_voice = 5;
+  bool voice_feedback_enabled = 6;
+  repeated string favorite_voices = 7;
+  map<string, string> custom_settings = 8;
+}
+
+// Voice service configuration
+message VoiceServiceConfig {
+  string service_url = 1;
+  string api_key = 2;
+  int32 max_concurrent_sessions = 3;
+  int32 session_timeout_seconds = 4;
+  bool enable_voice_models = 5;
+  repeated string supported_formats = 6;
+  repeated int32 supported_sample_rates = 7;
+  map<string, string> service_parameters = 8;
+}

@@ -1,0 +1,58 @@
+# Database Configuration - REQUIRED FOR THE APP TO WORK
+DATABASE_URL="file:./dev.db"
+
+# JWT Configuration
+JWT_SECRET="your-super-secret-jwt-key-here"
+
+# AI Services - REQUIRED for full functionality
+OPENAI_API_KEY="your-openai-api-key-here"
+
+# OpenRouter API - REQUIRED for therapeutic chat responses
+OPENROUTER_API_KEY="your-openrouter-api-key-here"
+OPENROUTER_API_URL="https://openrouter.ai/api/v1/chat/completions"
+OPENROUTER_MODEL="openai/gpt-4o-mini"
+
+# OpenAI Realtime TTS - REQUIRED for voice functionality
+NEXT_PUBLIC_OPENAI_API_KEY="your-openai-api-key-here"
+
+# ElevenLabs Voice Synthesis
+NEXT_PUBLIC_ELEVENLABS_API_KEY="your-elevenlabs-api-key-here"
+
+# Cartesia TTS
+CARTESIA_API_KEY="your-cartesia-api-key-here"
+
+# Gemini Vision API (Google Studios AI)
+GEMINI_API_KEY="your-gemini-api-key-here"
+
+# Stripe Configuration
+STRIPE_SECRET_KEY="your-stripe-secret-key-here"
+STRIPE_WEBHOOK_SECRET="your-stripe-webhook-secret-here"
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="your-stripe-publishable-key-here"
+
+# Email Configuration (if using email services)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT="587"
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-email-password"
+
+# Application Configuration
+NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+NODE_ENV="development"
+
+# Database Configuration (for local development)
+DATABASE_URL="file:./dev.db"
+
+# Social Login Configuration
+NEXT_PUBLIC_GOOGLE_CLIENT_ID="your-google-client-id-here"
+APPLE_CLIENT_ID="your-apple-client-id-here"
+APPLE_CLIENT_SECRET="your-apple-client-secret-here"
+MICROSOFT_CLIENT_ID="your-microsoft-client-id-here"
+MICROSOFT_CLIENT_SECRET="your-microsoft-client-secret-here"
+MICROSOFT_TENANT_ID="common"
+
+# NextAuth Configuration
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="your-nextauth-secret-key-here"
+
+# Redis Configuration (if using Redis for caching)
+REDIS_URL="redis://localhost:6379"

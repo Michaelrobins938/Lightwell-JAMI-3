@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Pipeline Debug & Visual Effects Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .test-section {
+            background: #2a2a2a;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border: 1px solid #444;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            margin: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        .log {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        .success { background: #2d5a2d; color: #90ee90; }
+        .error { background: #5a2d2d; color: #ffb6c1; }
+        .warning { background: #5a5a2d; color: #ffffe0; }
+        .info { background: #2d2d5a; color: #add8e6; }
+    </style>
+</head>
+<body>
+    <h1>🎵 Audio Pipeline Debug & Visual Effects Test</h1>
+    
+    <div class="test-section">
+        <h2>🔧 Connection & Audio Tests</h2>
+        <button onclick="testConnection()">🔌 Test Connection</button>
+        <button onclick="testAudioPipeline()">🎵 Test Audio Pipeline</button>
+        <button onclick="restoreVisualEffects()">🎨 Restore Visual Effects</button>
+        <button onclick="testCompletePipeline()">🚀 Test Complete Pipeline</button>
+        <button onclick="clearLog()">🗑️ Clear Log</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Connection Status</h2>
+        <div id="connectionStatus" class="status info">Not connected</div>
+        <div id="audioStatus" class="status info">No audio activity</div>
+    </div>
+
+    <div class="test-section">
+        <h2>📝 Debug Log</h2>
+        <div id="log" class="log">Ready to test...\n</div>
+    </div>
+
+    <script>
+        let chatClient = null;
+        let logElement = null;
+        let connectionStatusElement = null;
+        let audioStatusElement = null;
+
+        // Initialize when page loads
+        window.addEventListener('load', async () => {
+            logElement = document.getElementById('log');
+            connectionStatusElement = document.getElementById('connectionStatus');
+            audioStatusElement = document.getElementById('audioStatus');
+            
+            log('🚀 Page loaded, waiting for chatClient...');
+            
+            // Wait for chatClient to be available
+            await waitForChatClient();
+        });
+
+        async function waitForChatClient() {
+            let attempts = 0;
+            while (attempts < 50) {
+                if (window.chatClient) {
+                    chatClient = window.chatClient;
+                    log('✅ ChatClient found!');
+                    updateConnectionStatus('ChatClient ready');
+                    setupEventListeners();
+                    return;
+                }
+                await new Promise(resolve => setTimeout(resolve, 100));
+                attempts++;
+            }
+            log('❌ ChatClient not found after 5 seconds');
+        }
+
+        function setupEventListeners() {
+            if (!chatClient) return;
+            
+            // Listen for connection events
+            chatClient.on('connected', () => {
+                log('🔗 Connected event fired');
+                updateConnectionStatus('Connected to OpenAI');
+            });
+            
+            chatClient.on('disconnected', () => {
+                log('🔌 Disconnected event fired');
+                updateConnectionStatus('Disconnected');
+            });
+            
+            chatClient.on('error', (error) => {
+                log('❌ Error event:', error);
+                updateConnectionStatus('Error occurred');
+            });
+            
+            // Listen for audio events
+            chatClient.on('audio_active', (active) => {
+                log(`🎵 Audio active: ${active}`);
+                updateAudioStatus(active ? 'Audio active' : 'Audio inactive');
+            });
+            
+            chatClient.on('audio_volume', (volume) => {
+                log(`🔊 Audio volume: ${volume.toFixed(2)}`);
+                updateAudioStatus(`Volume: ${(volume * 100).toFixed(0)}%`);
+            });
+            
+            chatClient.on('audio_received', (data) => {
+                log('📥 Audio received event:', data);
+                updateAudioStatus('Audio data received');
+            });
+        }
+
+        async function testConnection() {
+            if (!chatClient) {
+                log('❌ ChatClient not available');
+                return;
+            }
+            
+            try {
+                log('🔌 Testing connection...');
+                updateConnectionStatus('Connecting...');
+                
+                await chatClient.connect();
+                
+                log('✅ Connection successful!');
+                updateConnectionStatus('Connected');
+                
+                const info = chatClient.getConnectionInfo();
+                log('📊 Connection info:', JSON.stringify(info, null, 2));
+                
+            } catch (error) {
+                log('❌ Connection failed:', error);
+                updateConnectionStatus('Connection failed');
+            }
+        }
+
+        async function testAudioPipeline() {
+            if (!chatClient) {
+                log('❌ ChatClient not available');
+                return;
+            }
+            
+            try {
+                log('🎵 Testing audio pipeline...');
+                updateAudioStatus('Testing audio...');
+                
+                await chatClient.debugAudioPipeline();
+                
+                log('✅ Audio pipeline test completed');
+                updateAudioStatus('Pipeline test complete');
+                
+            } catch (error) {
+                log('❌ Audio pipeline test failed:', error);
+                updateAudioStatus('Pipeline test failed');
+            }
+        }
+
+        async function restoreVisualEffects() {
+            if (!chatClient) {
+                log('❌ ChatClient not available');
+                return;
+            }
+            
+            try {
+                log('🎨 Restoring visual effects...');
+                updateAudioStatus('Restoring effects...');
+                
+                chatClient.restoreVisualEffects();
+                
+                log('✅ Visual effects restoration started');
+                updateAudioStatus('Effects restoring...');
+                
+            } catch (error) {
+                log('❌ Visual effects restoration failed:', error);
+                updateAudioStatus('Effects restoration failed');
+            }
+        }
+
+        async function testCompletePipeline() {
+            if (!chatClient) {
+                log('❌ ChatClient not available');
+                return;
+            }
+            
+            try {
+                log('🚀 Testing complete pipeline...');
+                updateConnectionStatus('Testing pipeline...');
+                updateAudioStatus('Testing pipeline...');
+                
+                await chatClient.testCompletePipeline();
+                
+                log('✅ Complete pipeline test finished');
+                updateConnectionStatus('Pipeline test complete');
+                updateAudioStatus('Pipeline test complete');
+                
+            } catch (error) {
+                log('❌ Complete pipeline test failed:', error);
+                updateConnectionStatus('Pipeline test failed');
+                updateAudioStatus('Pipeline test failed');
+            }
+        }
+
+        function clearLog() {
+            if (logElement) {
+                logElement.textContent = 'Log cleared...\n';
+            }
+        }
+
+        function log(message, data = null) {
+            if (logElement) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logMessage = data ? 
+                    `[${timestamp}] ${message} ${JSON.stringify(data, null, 2)}\n` :
+                    `[${timestamp}] ${message}\n`;
+                logElement.textContent += logMessage;
+                logElement.scrollTop = logElement.scrollHeight;
+            }
+            console.log(message, data);
+        }
+
+        function updateConnectionStatus(status) {
+            if (connectionStatusElement) {
+                connectionStatusElement.textContent = status;
+                connectionStatusElement.className = 'status info';
+                if (status.includes('Connected')) connectionStatusElement.className = 'status success';
+                if (status.includes('Error') || status.includes('failed')) connectionStatusElement.className = 'status error';
+            }
+        }
+
+        function updateAudioStatus(status) {
+            if (audioStatusElement) {
+                audioStatusElement.textContent = status;
+                audioStatusElement.className = 'status info';
+                if (status.includes('active') || status.includes('received')) audioStatusElement.className = 'status success';
+                if (status.includes('Error') || status.includes('failed')) audioStatusElement.className = 'status error';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Voice Test Minimal</title>
+  <style>
+    body { background:#111; color:#eee; font-family:sans-serif; padding:20px; }
+    button { margin:5px; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; }
+    .connect { background:#2ecc71; }
+    .send { background:#3498db; }
+    .disconnect { background:#e74c3c; }
+    pre { background:#000; color:#0f0; padding:10px; height:300px; overflow-y:scroll; }
+  </style>
+</head>
+<body>
+  <h1>🎤 Voice Test Minimal</h1>
+  <p>Status: <span id="status">disconnected</span></p>
+  <button class="connect" onclick="connect()">Connect</button>
+  <button class="send" onclick="sendMessage()">Send Ping</button>
+  <button class="disconnect" onclick="disconnect()">Disconnect</button>
+
+  <h2>Latest Response:</h2>
+  <div id="response">…</div>
+
+  <h2>Event Log:</h2>
+  <pre id="log"></pre>
+
+  <script>
+    let ws;
+
+    function log(msg, data) {
+      const el = document.getElementById("log");
+      el.textContent += msg + (data ? " " + JSON.stringify(data) : "") + "\n";
+      el.scrollTop = el.scrollHeight;
+      console.log(msg, data || "");
+    }
+
+    function setStatus(text) {
+      document.getElementById("status").textContent = text;
+    }
+
+    function connect() {
+      ws = new WebSocket("ws://localhost:3000/api/realtime");
+
+      ws.onopen = () => {
+        setStatus("connected");
+        log("✅ Connected to proxy");
+      };
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          log("📥", data);
+
+          if (data.type === "response.output_text.delta") {
+            document.getElementById("response").textContent += data.delta;
+          }
+          if (data.type === "response.output_text.done") {
+            document.getElementById("response").textContent += "\n---\n";
+          }
+        } catch {
+          log("📥 raw", event.data);
+        }
+      };
+
+      ws.onclose = () => {
+        setStatus("disconnected");
+        log("🔌 Disconnected");
+      };
+
+      ws.onerror = (err) => {
+        log("❌ Error", err);
+      };
+    }
+
+    function sendMessage() {
+      if (!ws || ws.readyState !== WebSocket.OPEN) {
+        log("⚠️ Not connected");
+        return;
+      }
+
+      // STEP 1: Send user input
+      ws.send(JSON.stringify({
+        type: "conversation.item.create",
+        item: {
+          type: "message",
+          role: "user",
+          content: [{ type: "input_text", text: "Hello from browser!" }]
+        }
+      }));
+      log("📤 Sent conversation.item.create");
+
+      // STEP 2: Request response
+      ws.send(JSON.stringify({
+        type: "response.create",
+        response: { modalities: ["text", "audio"], instructions: "Respond conversationally." }
+      }));
+      log("📤 Sent response.create");
+    }
+
+    function disconnect() {
+      if (ws) ws.close();
+    }
+  </script>
+</body>
+</html>

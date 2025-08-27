@@ -1,0 +1,38 @@
+# Exclude demo pages from deployment
+src/pages/demo-*.tsx
+
+# Exclude test pages from deployment
+src/pages/*test*.tsx
+src/pages/test-*.tsx
+src/pages/*-test.tsx
+
+# Exclude backup files from deployment
+src/pages/*backup*.tsx
+src/pages/*.backup.tsx
+
+# Exclude development/demo pages from deployment
+src/pages/jami3-gpt5-demo.tsx
+src/pages/public-gpt5.tsx
+src/pages/voice-test.tsx
+
+# Exclude API test endpoints from deployment
+src/pages/api/*test*.ts
+src/pages/api/test-*.ts
+src/pages/api/*-test.ts
+src/pages/api/advanced-ai-test.ts
+src/pages/api/comprehensive-ai-test.ts
+src/pages/api/jamie/memory-test.ts
+
+# Exclude temporary files and logs
+logs/
+*.log
+.env.local
+.env.development
+
+# Exclude development tools and scripts
+scripts/
+debug-*.js
+temp_*.tsx
+
+# Keep essential files for deployment
+# (Next.js will still include necessary files)

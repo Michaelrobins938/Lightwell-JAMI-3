@@ -1,0 +1,69 @@
+@keyframes luna-breathe {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05) rotate(180deg);
+    opacity: 1;
+  }
+}
+.luna-orb {
+  width: 240px;
+  height: 240px;
+  position: relative;
+  animation: luna-breathe 6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .luna-orb {
+    animation: none;
+  }
+}
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in {
+  animation: fade-in 0.8s cubic-bezier(0.25,0.46,0.45,0.94) both;
+}
+.scroll-glass-revealer {
+  opacity: 0;
+  transform: translateY(40px);
+  filter: blur(5px);
+  transition: all 0.8s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.scroll-glass-revealer.in-view {
+  opacity: 1;
+  transform: translateY(0);
+  filter: blur(0);
+}
+
+/* GPT-5 Beam Gradient Animations */
+@keyframes gradient-beam {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes gradient-beam-reverse {
+  0% { background-position: 100% 50%; }
+  50% { background-position: 0% 50%; }
+  100% { background-position: 100% 50%; }
+}
+
+.animate-gradient-beam {
+  background-size: 300% 300%;
+  animation: gradient-beam 25s ease infinite;
+}
+
+.animate-gradient-beam-reverse {
+  background-size: 300% 300%;
+  animation: gradient-beam-reverse 30s ease infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-gradient-beam,
+  .animate-gradient-beam-reverse {
+    animation: none;
+  }
+} 

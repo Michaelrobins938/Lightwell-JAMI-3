@@ -1,0 +1,39 @@
+.neuro-button {
+  background: linear-gradient(145deg, #E8E8E8, #D1D1D1);
+  box-shadow: 20px 20px 60px rgba(0,0,0,0.15), -20px -20px 60px rgba(255,255,255,0.7);
+  border-radius: 24px;
+  border: none;
+  padding: 16px 32px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  min-height: 48px;
+  min-width: 48px;
+}
+.neuro-button:hover {
+  box-shadow: 10px 10px 30px rgba(0,0,0,0.15), -10px -10px 30px rgba(255,255,255,0.7);
+  transform: translateY(-2px);
+}
+.neuro-button:active {
+  box-shadow: inset 10px 10px 20px rgba(0,0,0,0.15);
+  transform: translateY(0);
+}
+.neuro-button--primary {
+  background: linear-gradient(145deg, #A370FF, #8B5CF6);
+  color: white;
+}
+.neuro-button--secondary {
+  background: linear-gradient(145deg, #FAFAFA, #E8E8E8);
+  color: #9C63FF;
+}
+.neuro-button--tertiary {
+  background: linear-gradient(145deg, #FFD6E0, #C7F9FF);
+  color: #0D0F1C;
+}
+.neuro-icon {
+  background: linear-gradient(145deg, #F0F0F0, #E0E0E0);
+  box-shadow: 15px 15px 30px rgba(0,0,0,0.1), -15px -15px 30px rgba(255,255,255,0.8);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+} 

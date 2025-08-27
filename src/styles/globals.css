@@ -1,0 +1,563 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* GPT-5 Dark Theme */
+body {
+  @apply bg-gradient-to-br from-red-900 via-purple-900 to-purple-950 min-h-screen text-gray-100;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial;
+}
+
+/* Dark Glass Card Utility */
+.card-glass-dark {
+  @apply bg-gray-800/80 backdrop-blur-lg border border-gray-700/50 rounded-2xl shadow-lg;
+}
+
+/* Enhanced glass variants for dark theme */
+.card-glass-elevated-dark {
+  @apply bg-gray-800/90 backdrop-blur-xl border border-gray-600/50 rounded-3xl shadow-2xl;
+}
+
+.card-glass-subtle-dark {
+  @apply bg-gray-800/60 backdrop-blur-md border border-gray-700/30 rounded-xl shadow-md;
+}
+
+/* GPT-5 Beam Gradient Animation */
+@keyframes gradient-x {
+  0%, 100% {
+    background-size: 400% 400%;
+    background-position: 0% 50%;
+  }
+  50% {
+    background-size: 400% 400%;
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes gpt5-beam {
+  0%, 100% {
+    background-size: 300% 300%;
+    background-position: 0% 50%;
+  }
+  50% {
+    background-size: 300% 300%;
+    background-position: 100% 50%;
+  }
+}
+
+/* GPT-5 Unified Beam Gradient Theme */
+.gpt5-beam-gradient {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 25%, #ec4899 50%, #8b5cf6 75%, #a855f7 100%);
+  animation: gpt5-beam 8s ease-in-out infinite;
+}
+
+.gpt5-beam-gradient-static {
+  background: linear-gradient(135deg, #f59e0b 0%, #f97316 25%, #ec4899 50%, #8b5cf6 75%, #a855f7 100%);
+}
+
+/* Voice Mode Pulse Ring Animations */
+@keyframes pulseRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.3;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.pulse-ring-blue {
+  animation: pulseRing 2s infinite ease-out;
+}
+
+.pulse-ring-purple {
+  animation: pulseRing 3s infinite ease-out;
+  animation-delay: 0.5s;
+}
+
+/* ChatGPT Pixel-Perfect Overscroll Fix */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Only restrict height on chat pages */
+body[data-page="chat"] #__next {
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
+
+body[data-page="chat"] {
+  height: 100vh !important;
+  max-height: 100vh !important;
+}
+
+/* Enhanced Smooth Scrolling UX */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 2rem; /* Accounts for any fixed headers */
+}
+
+/* ChatGPT Input Placeholder Styling */
+input::placeholder,
+textarea::placeholder {
+  color: #999999;
+  opacity: 1;
+}
+
+/* ChatGPT 5 Scrollbar Hiding - Only on chat pages */
+body[data-page="chat"] ::-webkit-scrollbar {
+  display: none;
+}
+
+body[data-page="chat"] * {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Smooth momentum scrolling for mobile devices */
+* {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+/* Showcase-specific mobile optimizations */
+@media (max-width: 768px) {
+  .progress-dots {
+    right: 2px;
+    transform: scale(0.8);
+  }
+}
+
+/* Prevent overscroll bounce on mobile */
+html, body {
+  overscroll-behavior: none;
+}
+
+/* CSS Custom Properties for GPT-5 Beam Theme */
+:root {
+  /* GPT-5 Beam Gradient Colors */
+  --gpt5-amber-start: #f59e0b;
+  --gpt5-orange: #f97316;
+  --gpt5-pink: #ec4899;
+  --gpt5-purple: #8b5cf6;
+  --gpt5-purple-end: #a855f7;
+  
+  /* Dark Foundation Colors */
+  --gpt5-zinc-900: #18181b;
+  --gpt5-zinc-800: #27272a;
+  --gpt5-zinc-700: #3f3f46;
+  --gpt5-black: #000000;
+  --gpt5-slate-950: #020617;
+  --gpt5-slate-900: #0f172a;
+  
+  /* GPT-5 Beam Gradients */
+  --gpt5-beam-gradient: linear-gradient(135deg, var(--gpt5-amber-start) 0%, var(--gpt5-orange) 25%, var(--gpt5-pink) 50%, var(--gpt5-purple) 75%, var(--gpt5-purple-end) 100%);
+  --gpt5-beam-gradient-radial: radial-gradient(circle at center, var(--gpt5-amber-start) 0%, var(--gpt5-orange) 30%, var(--gpt5-pink) 60%, var(--gpt5-purple) 100%);
+  
+  /* Legacy Luna Colors (kept for compatibility) */
+  --luna-50: #f3f8ff;
+  --luna-100: #e3eefe;
+  --luna-200: #c2dbfa;
+  --luna-300: #8bbcf2;
+  --luna-400: #4a90e2;
+  --luna-500: #2563eb;
+  --luna-600: #174ea6;
+  --luna-700: #102a43;
+  --luna-800: #0a1929;
+  --luna-900: #06101a;
+
+  /* OpenAI-style Orb Mode Animation Variables */
+  --orb-transition-duration: 0.4s;
+  --overlay-fade-duration: 0.25s;
+  --orb-easing: cubic-bezier(0.4, 0, 0.2, 1);
+  --sidebar-fade-opacity: 0.15;
+  --overlay-bg: rgba(0, 0, 0, 0.85);
+  
+  /* Fullscreen Orb Mode Variables */
+  --fullscreen-entry-duration: 0.5s;
+  --fullscreen-exit-duration: 0.4s;
+  --fullscreen-controls-delay: 0.8s;
+  --fullscreen-orb-glow-duration: 4s;
+  
+  /* Jamie — Live Status Design Tokens */
+  /* Colors - Dark Theme */
+  --ls-bg: #0b0e11;
+  --ls-bg-soft: #111418;
+  --ls-fg-strong: #e6e7e9;
+  --ls-fg-muted: #b6bac1;
+  --ls-fg-subtle: #8c9097;
+  --ls-brand: #7c4dff;
+  --ls-brand-2: #4ea7ff;
+  --ls-border-soft: rgba(255, 255, 255, 0.08);
+  --ls-danger: #ff477e;
+  --ls-danger-2: #ff7854;
+  
+  /* Gradients */
+  --ls-grad-brand: linear-gradient(135deg, #7c4dff 0%, #4ea7ff 100%);
+  --ls-grad-danger: linear-gradient(135deg, #ff477e, #ff7854);
+  
+  /* Glow Effects */
+  --ls-glow-orb: 0 0 24px rgba(124, 77, 255, 0.22), 0 0 64px rgba(78, 167, 255, 0.18);
+  --ls-shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.06);
+  
+  /* Motion */
+  --ls-dur-fast: 120ms;
+  --ls-dur-med: 250ms;
+  --ls-dur-slow: 400ms;
+  --ls-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light theme overrides for Live Status */
+[data-theme="light"] {
+  --ls-bg: #ffffff;
+  --ls-bg-soft: #f8f9fa;
+  --ls-fg-strong: #1a1d21;
+  --ls-fg-muted: #4a5568;
+  --ls-fg-subtle: #718096;
+  --ls-border-soft: rgba(0, 0, 0, 0.06);
+  --ls-shadow-panel: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Reduced Motion Handling */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --orb-transition-duration: 0.1s;
+    --overlay-fade-duration: 0.1s;
+    --fullscreen-entry-duration: 0.1s;
+    --fullscreen-exit-duration: 0.1s;
+    --fullscreen-controls-delay: 0s;
+    --fullscreen-orb-glow-duration: 0.1s;
+  }
+  
+  .orb-transition {
+    transition: none !important;
+    animation: none !important;
+  }
+  
+  .orb-particles {
+    animation: none !important;
+  }
+}
+
+/* Marquee animations with wave-like movement */
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes marquee-reverse {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateY(0%);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
+}
+
+@keyframes scroll-reverse {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(0%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.animate-marquee-reverse {
+  animation: marquee-reverse 25s linear infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.animate-scroll {
+  animation: scroll 60s linear infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+.animate-scroll-reverse {
+  animation: scroll-reverse 70s linear infinite;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@layer base {
+  body {
+    @apply bg-zinc-900/95 backdrop-blur-md text-white font-sans antialiased;
+    background-attachment: fixed;
+  }
+  html {
+    @apply bg-zinc-900;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-sans text-white tracking-tight;
+  }
+  a {
+    @apply text-zinc-300 hover:text-white font-semibold transition-colors duration-200;
+  }
+}
+
+@layer components {
+  .glass-bg {
+    @apply bg-zinc-900/95 backdrop-blur-xl border border-zinc-800/50 rounded-2xl shadow-2xl;
+  }
+  .soft-card {
+    @apply bg-zinc-900/95 backdrop-blur-md rounded-2xl shadow-2xl border border-zinc-800/50 p-8;
+  }
+  .card-floating {
+    @apply shadow-2xl rounded-2xl bg-zinc-900/95 backdrop-blur-md border border-zinc-800/50 p-8;
+  }
+  .btn-primary {
+    @apply bg-gradient-to-r from-blue-500 to-purple-500 text-white font-sans text-lg py-3 px-8 rounded-full shadow-lg hover:from-blue-600 hover:to-purple-600 hover:scale-105 transition-all duration-200;
+  }
+  .btn-secondary {
+    @apply bg-zinc-800/50 text-white font-semibold py-3 px-8 rounded-full shadow-lg border border-zinc-700 hover:bg-zinc-700/50 hover:border-zinc-600 transition-all duration-200 backdrop-blur-sm;
+  }
+  .input {
+    @apply bg-zinc-800/50 border border-zinc-700 rounded-2xl px-5 py-3 text-lg font-sans focus:ring-2 focus:ring-blue-500 focus:outline-none transition-all duration-200 backdrop-blur-sm text-white placeholder-zinc-400;
+  }
+  .neuro-button {
+    @apply relative overflow-hidden font-sans font-semibold transition-all duration-300 transform;
+  }
+  .neuro-button--primary {
+    @apply bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg hover:shadow-xl;
+  }
+  .neuro-button--primary::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-white/20 to-transparent opacity-0 transition-opacity duration-300;
+  }
+  .neuro-button--primary:hover::before {
+    @apply opacity-100;
+  }
+  .neuro-button--secondary {
+    @apply bg-zinc-800/50 text-white border border-zinc-700 backdrop-blur-sm hover:bg-zinc-700/50 hover:border-zinc-600;
+  }
+  .neuro-button--secondary::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-r from-white/10 to-transparent opacity-0 transition-opacity duration-300;
+  }
+  .neuro-button--secondary:hover::before {
+    @apply opacity-100;
+  }
+  /* Chat page specific styles to override global gradient */
+  .chat-page {
+    @apply bg-zinc-900/95 backdrop-blur-md;
+  }
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-purple-500;
+}
+
+/* Chart styles for Recharts */
+.recharts-wrapper {
+  font-family: inherit;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(156, 163, 175, 0.2);
+}
+
+.recharts-bar-rectangle {
+  transition: opacity 0.2s ease;
+}
+
+.recharts-bar-rectangle:hover {
+  opacity: 0.8;
+}
+
+.recharts-text {
+  font-size: 12px;
+  fill: #e5e7eb;
+}
+
+.recharts-cartesian-axis-tick-value {
+  font-size: 12px;
+  fill: #e5e7eb;
+}
+
+.recharts-cartesian-axis-line {
+  stroke: #374151;
+}
+
+.recharts-cartesian-grid-horizontal line,
+.recharts-cartesian-grid-vertical line {
+  stroke: rgba(156, 163, 175, 0.1);
+}
+
+/* Chat page specific background override */
+.chat-page {
+  @apply bg-zinc-900/95 backdrop-blur-md;
+}
+
+/* Enhanced Scrollbar Styling for Better UX */
+::-webkit-scrollbar {
+  width: 6px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, rgba(75, 85, 99, 0.4), rgba(107, 114, 128, 0.6));
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.7), rgba(156, 163, 175, 0.8));
+  transform: scaleY(1.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox scrollbar styling */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(107, 114, 128, 0.6) transparent;
+}
+
+/* Luna Sidebar scrollbar */
+.sidebar-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+.sidebar-scroll::-webkit-scrollbar { 
+  width: 8px; 
+}
+.sidebar-scroll::-webkit-scrollbar-thumb { 
+  background: rgba(255,255,255,.15); 
+  border-radius: 8px; 
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+.sidebar-scroll::-webkit-scrollbar-thumb:hover { 
+  background: rgba(255,255,255,.25); 
+  background-clip: padding-box;
+}
+.sidebar-scroll::-webkit-scrollbar-track { 
+  background: transparent; 
+}
+.sidebar-scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Fullscreen Orb Mode Utilities */
+.bg-gradient-radial {
+  background-image: radial-gradient(circle, var(--tw-gradient-stops));
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .luna-sidebar * { 
+    transition: none !important; 
+    animation: none !important; 
+  }
+  
+  /* Fullscreen orb mode reduced motion */
+  .fullscreen-orb-mode * {
+    transition-duration: 0.1s !important;
+    animation-duration: 0.1s !important;
+  }
+}
+
+/* ChatGPT Interface pulsing orb styles */
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background-color: white;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.9); }
+  50% { opacity: 1; transform: scale(1.2); }
+}
+
+.animate-pulse { 
+  animation: pulse 1.2s infinite; 
+}
+
+/* Import GPT AI Therapy styles */
+@import "./gpt.css";
+
+/* 🎬 QUICK KILL-SWITCH: Disable all scroll-reveal animations for screenshots */
+/* Set DISABLE_SCROLL_ANIMATIONS = true in _app.tsx to enable this */
+.disable-scroll-animations [data-aos],
+.disable-scroll-animations .motion,
+.disable-scroll-animations .fade-in,
+.disable-scroll-animations .opacity-0,
+.disable-scroll-animations .translate-y-10,
+.disable-scroll-animations .translate-y-20,
+.disable-scroll-animations .scale-95,
+.disable-scroll-animations .scale-105 {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Force all motion components to be visible immediately */
+.disable-scroll-animations [class*="motion"],
+.disable-scroll-animations [class*="animate-"] {
+  opacity: 1 !important;
+  transform: none !important;
+  transition-duration: 0s !important;
+  animation-duration: 0s !important;
+}
+
+/* Override Framer Motion scroll triggers */
+.disable-scroll-animations [class*="whileInView"],
+.disable-scroll-animations [class*="initial"],
+.disable-scroll-animations [class*="animate"] {
+  opacity: 1 !important;
+  transform: translateY(0) translateX(0) scale(1) !important;
+}
+
+/* ChatGPT Message Animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+  animation: fadeIn 0.2s cubic-bezier(0.2, 0.8, 0.4, 1);
+}
+
+@keyframes pulseDot {
+  0%, 80%, 100% { transform: scale(1); opacity: 0.6; }
+  40% { transform: scale(1.4); opacity: 1; }
+}
+.animate-pulseDot {
+  animation: pulseDot 1.2s infinite;
+}

@@ -1,0 +1,225 @@
+/**
+ * OpenAI Realtime API Proxy
+ * Streams binary audio chunks from OpenAI to the frontend
+ */
+
+import { NextApiRequest, NextApiResponse } from "next";
+import { Server as WebSocketServer } from "ws";
+import { Server as NetServer } from "http";
+import WebSocket from "ws";
+
+const OPENAI_REALTIME_URL = "wss://api.openai.com/v1/realtime";
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+const VOICE_MAPPING = {
+  vale: "alloy",
+  ember: "echo",
+  cove: "fable",
+  spruce: "onyx",
+  maple: "nova",
+  arbor: "shimmer",
+  breeze: "alloy",
+  juniper: "onyx",
+  sol: "echo",
+};
+
+const activeSessions = new Map();
+let wss: WebSocketServer | null = null;
+
+function initWebSocketServer(res: NextApiResponse) {
+  if (typeof window !== "undefined") return null;
+
+  if (wss) return wss;
+
+  const httpServer = (res.socket as any)?.server as NetServer;
+  if (!httpServer) return null;
+
+  if (!httpServer.wss) {
+    wss = new WebSocketServer({ noServer: true });
+
+    httpServer.on("upgrade", (request: any, socket: any, head: any) => {
+      if (request.url === "/api/voice/realtime") {
+        wss!.handleUpgrade(request, socket, head, (ws) => {
+          wss!.emit("connection", ws, request);
+        });
+      }
+    });
+
+    httpServer.wss = wss;
+  } else {
+    wss = httpServer.wss;
+  }
+
+  if (wss && !(wss as any)._connectionHandlerAdded) {
+    (wss as any)._connectionHandlerAdded = true;
+
+    wss.on("connection", (ws: WebSocket, request: any) => {
+      ws.on("message", async (message: any) => {
+        try {
+          const data = JSON.parse(message.toString());
+          switch (data.type) {
+            case "init_session":
+              await handleSessionInit(ws, data);
+              break;
+            case "audio_chunk":
+              await handleAudioChunk(data);
+              break;
+            case "end_session":
+              handleSessionEnd(data.sessionId);
+              break;
+          }
+        } catch (err) {
+          console.error("❌ Error handling message:", err);
+        }
+      });
+
+      ws.on("close", () => {
+        for (const [sessionId, session] of activeSessions.entries()) {
+          if (session.ws === ws) {
+            handleSessionEnd(sessionId);
+          }
+        }
+      });
+    });
+  }
+
+  return wss;
+}
+
+async function handleSessionInit(ws: WebSocket, data: any) {
+  const openaiVoiceId =
+    VOICE_MAPPING[data.voiceId as keyof typeof VOICE_MAPPING] || "echo";
+
+  const openaiWs = new WebSocket(
+    `${OPENAI_REALTIME_URL}?model=gpt-4o-realtime-preview`,
+    {
+      headers: {
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        "OpenAI-Beta": "realtime=v1",
+      },
+    }
+  );
+
+  openaiWs.on("open", () => {
+    const initMessage = {
+      type: "session.create",
+      session: {
+        model: "gpt-4o-realtime-preview",
+        voice: openaiVoiceId,
+        modalities: ["audio", "text"],
+        audio: {
+          input: { type: "microphone", sampling_rate: 16000 },
+          output: { type: "speaker", sampling_rate: 24000 },
+        },
+      },
+    };
+    openaiWs.send(JSON.stringify(initMessage));
+
+    activeSessions.set(data.sessionId, {
+      ws,
+      openaiWs,
+      voiceId: data.voiceId,
+      isActive: true,
+    });
+
+    ws.send(
+      JSON.stringify({
+        type: "session_ready",
+        sessionId: data.sessionId,
+        voiceId: data.voiceId,
+      })
+    );
+  });
+
+  openaiWs.on("message", (event) => {
+    try {
+      const response = JSON.parse(event.toString());
+      handleOpenAIMessage(ws, response, data.sessionId);
+    } catch {
+      console.error("❌ Failed to parse OpenAI response");
+    }
+  });
+
+  openaiWs.on("close", () => handleSessionEnd(data.sessionId));
+}
+
+async function handleAudioChunk(data: any) {
+  const session = activeSessions.get(data.sessionId);
+  if (!session || !session.isActive) return;
+
+  const audioMessage = {
+    type: "input_audio_buffer.append",
+    audio: Buffer.from(data.audioData).toString("base64"),
+  };
+
+  session.openaiWs.send(JSON.stringify(audioMessage));
+}
+
+function handleOpenAIMessage(ws: WebSocket, data: any, sessionId: string) {
+  const session = activeSessions.get(sessionId);
+  if (!session) return;
+
+  switch (data.type) {
+    case "audio.delta": {
+      try {
+        const audioBuffer = Buffer.from(data.delta, "base64");
+        ws.send(audioBuffer, { binary: true }); // ✅ send raw audio
+      } catch (err) {
+        console.error("❌ Failed to forward audio:", err);
+      }
+      break;
+    }
+    case "assistant.delta":
+      ws.send(
+        JSON.stringify({
+          type: "assistant_message",
+          sessionId,
+          message: data.delta,
+          voiceId: session.voiceId,
+        })
+      );
+      break;
+    case "transcript.delta":
+      ws.send(
+        JSON.stringify({
+          type: "transcript_update",
+          sessionId,
+          transcript: data.delta,
+          isFinal: data.is_final || false,
+        })
+      );
+      break;
+    case "error":
+      ws.send(JSON.stringify({ type: "openai_error", sessionId, error: data.error }));
+      break;
+    default:
+      ws.send(JSON.stringify({ type: "openai_response", sessionId, data }));
+  }
+}
+
+function handleSessionEnd(sessionId: string) {
+  const session = activeSessions.get(sessionId);
+  if (session) {
+    if (session.openaiWs) session.openaiWs.close();
+    activeSessions.delete(sessionId);
+  }
+}
+
+export default function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.headers.upgrade === "websocket") {
+    initWebSocketServer(res);
+    return;
+  } else {
+    res.status(200).json({
+      status: "Voice proxy server running",
+      activeSessions: activeSessions.size,
+      supportedVoices: Object.keys(VOICE_MAPPING),
+    });
+  }
+}
+
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
