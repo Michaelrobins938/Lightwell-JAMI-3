@@ -1,0 +1,1341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Michael's Data Visualization Portfolio | Transforming Data into Art</title>
+    <meta name="description" content="An interactive journey through data visualization - from raw, unstructured data to beautiful, insightful artwork.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --bg-dark: #0a0a0f;
+            --bg-darker: #050508;
+            --bg-card: #0f0f18;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-cyan: #06b6d4;
+            --accent-green: #10b981;
+            --accent-orange: #f59e0b;
+            --accent-blue: #3b82f6;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-tertiary: #64748b;
+            --glass-bg: rgba(15, 15, 25, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glow-purple: rgba(139, 92, 246, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.25;
+        }
+
+        .content-wrapper {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Floating Navigation */
+        .floating-nav {
+            position: fixed;
+            top: 50%;
+            right: 2.5rem;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .nav-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: rgba(139, 92, 246, 0.2);
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .nav-dot.active {
+            background: var(--accent-purple);
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 25px var(--glow-purple);
+            transform: scale(1.2);
+        }
+
+        .nav-dot:hover {
+            transform: scale(1.4);
+            background: var(--accent-pink);
+            border-color: var(--accent-pink);
+            box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+        }
+
+        .nav-dot::after {
+            content: attr(data-label);
+            position: absolute;
+            right: 28px;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            padding: 0.6rem 1.2rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            font-size: 0.875rem;
+            font-weight: 500;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-dot:hover::after {
+            opacity: 1;
+        }
+
+        /* Section Styling */
+        section {
+            min-height: 100vh;
+            padding: 5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        section.compact {
+            min-height: auto;
+            padding: 4rem 2rem;
+        }
+
+        .section-content {
+            max-width: 1400px;
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            text-align: center;
+        }
+
+        .hero-orb-container {
+            position: relative;
+            margin: 0 auto 3rem;
+            width: 180px;
+            height: 180px;
+        }
+
+        .hero-orb {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, var(--accent-purple), var(--accent-pink));
+            box-shadow: 0 0 100px var(--glow-purple),
+                        0 0 160px rgba(236, 72, 153, 0.3),
+                        inset 0 0 60px rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite, pulse-glow 3s ease-in-out infinite;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .hero-orb:hover {
+            transform: scale(1.1);
+            animation: float 6s ease-in-out infinite, pulse-glow 1s ease-in-out infinite;
+        }
+
+        .hero-orb::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 20%;
+            width: 40%;
+            height: 40%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.4), transparent);
+            border-radius: 50%;
+            filter: blur(20px);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) scale(1) rotate(0deg); }
+            33% { transform: translateY(-15px) scale(1.03) rotate(120deg); }
+            66% { transform: translateY(-8px) scale(1.01) rotate(240deg); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                box-shadow: 0 0 100px var(--glow-purple),
+                           0 0 160px rgba(236, 72, 153, 0.3),
+                           inset 0 0 60px rgba(255, 255, 255, 0.1);
+            }
+            50% {
+                box-shadow: 0 0 140px var(--glow-purple),
+                           0 0 200px rgba(236, 72, 153, 0.5),
+                           inset 0 0 80px rgba(255, 255, 255, 0.2);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInFromRight {
+            from {
+                opacity: 0;
+                transform: translateX(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.75rem, 8vw, 6rem);
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-purple) 30%, var(--accent-pink) 60%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .hero .tagline {
+            font-size: clamp(1.25rem, 3vw, 2rem);
+            color: var(--text-secondary);
+            max-width: 850px;
+            margin: 0 auto 1rem;
+            font-weight: 400;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .hero .sub-tagline {
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            color: var(--text-tertiary);
+            max-width: 700px;
+            margin: 0 auto 3rem;
+            font-weight: 300;
+            animation: fadeInUp 1s ease-out 0.9s both;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1.25rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2.5rem;
+            animation: fadeInUp 1s ease-out 1.2s both;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.1rem 2.75rem;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid transparent;
+            font-family: 'Space Grotesk', sans-serif;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 15px 50px rgba(139, 92, 246, 0.5);
+        }
+
+        .cta-button.secondary {
+            background: transparent;
+            border: 2px solid var(--accent-purple);
+            color: var(--accent-purple);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.15);
+        }
+
+        .cta-button.secondary:hover {
+            background: rgba(139, 92, 246, 0.15);
+            box-shadow: 0 15px 50px rgba(139, 92, 246, 0.3);
+        }
+
+        .scroll-prompt {
+            margin-top: 5rem;
+            animation: bounce 2.5s ease-in-out infinite;
+            color: var(--text-tertiary);
+            font-size: 0.95rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 500;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); opacity: 0.7; }
+            50% { transform: translateY(12px); opacity: 1; }
+        }
+
+        /* Section Headers */
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-number {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.9rem;
+            color: var(--accent-purple);
+            font-weight: 600;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .journey-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.25rem, 5vw, 4rem);
+            margin-bottom: 1.25rem;
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .journey-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.3rem;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+
+        /* Data Journey Section */
+        .data-journey {
+            background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-darker) 50%, var(--bg-dark) 100%);
+        }
+
+        .pipeline-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+            position: relative;
+        }
+
+        .pipeline-step {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .pipeline-step:hover {
+            transform: translateX(15px);
+            border-color: rgba(139, 92, 246, 0.6);
+            box-shadow: 0 8px 40px rgba(139, 92, 246, 0.2);
+        }
+
+        .step-number {
+            position: absolute;
+            top: -18px;
+            left: 2.5rem;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            box-shadow: 0 6px 25px var(--glow-purple);
+        }
+
+        .step-content {
+            display: grid;
+            grid-template-columns: 1fr 1.8fr;
+            gap: 2.5rem;
+            align-items: start;
+        }
+
+        .step-visual {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 16px;
+            padding: 1.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            color: var(--accent-green);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            max-height: 240px;
+            overflow-y: auto;
+            line-height: 1.6;
+            box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .step-visual::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .step-visual::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        .step-visual::-webkit-scrollbar-thumb {
+            background: var(--accent-green);
+            border-radius: 3px;
+        }
+
+        .step-description h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .step-description p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        .step-arrow {
+            text-align: center;
+            color: var(--accent-purple);
+            font-size: 2.5rem;
+            margin: -0.5rem 0;
+            opacity: 0.6;
+        }
+
+        /* Live Galaxy Demo */
+        .galaxy-demo {
+            background: var(--bg-darker);
+        }
+
+        .demo-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-top: 2.5rem;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .canvas-container {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            box-shadow: inset 0 2px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .galaxy-canvas {
+            width: 100%;
+            height: 550px;
+            display: block;
+        }
+
+        .demo-controls {
+            margin-top: 2rem;
+            display: flex;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .control-btn {
+            padding: 0.85rem 1.75rem;
+            background: rgba(139, 92, 246, 0.15);
+            border: 1.5px solid var(--accent-purple);
+            border-radius: 30px;
+            color: var(--accent-purple);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .control-btn:hover,
+        .control-btn.active {
+            background: var(--accent-purple);
+            color: white;
+            box-shadow: 0 6px 25px var(--glow-purple);
+            transform: translateY(-2px);
+        }
+
+        .demo-description {
+            margin-top: 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            line-height: 1.7;
+            padding: 0 2rem;
+        }
+
+        /* Visualization Gallery */
+        .viz-gallery {
+            background: linear-gradient(180deg, var(--bg-darker) 0%, var(--bg-dark) 100%);
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3.5rem;
+        }
+
+        .viz-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 0;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .viz-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent-purple), var(--accent-pink), var(--accent-cyan));
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+        }
+
+        .viz-card:hover {
+            transform: translateY(-12px);
+            border-color: rgba(139, 92, 246, 0.6);
+            box-shadow: 0 25px 70px rgba(139, 92, 246, 0.3);
+        }
+
+        .viz-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .viz-preview {
+            height: 220px;
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4.5rem;
+            border-bottom: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+
+        .viz-card:hover .viz-preview {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.25), rgba(236, 72, 153, 0.25));
+        }
+
+        .viz-info {
+            padding: 2rem;
+        }
+
+        .viz-info h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+        }
+
+        .viz-info p {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            line-height: 1.7;
+        }
+
+        .viz-badge {
+            display: inline-block;
+            margin-top: 1.25rem;
+            padding: 0.5rem 1.25rem;
+            background: rgba(139, 92, 246, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.4);
+            border-radius: 30px;
+            font-size: 0.85rem;
+            color: var(--accent-purple);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 500;
+        }
+
+        .viz-card.featured {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(236, 72, 153, 0.15));
+            border: 2px dashed var(--accent-purple);
+        }
+
+        /* Philosophy Section */
+        .philosophy-section {
+            background: var(--bg-dark);
+        }
+
+        .philosophy-content {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .philosophy-text {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 3.5rem;
+            box-shadow: 0 10px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .philosophy-text h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2.75rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .philosophy-text p {
+            color: var(--text-secondary);
+            line-height: 1.9;
+            font-size: 1.1rem;
+            margin-bottom: 1.75rem;
+        }
+
+        .philosophy-text p strong {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .philosophy-visual {
+            position: relative;
+            height: 450px;
+        }
+
+        .orbit-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            height: 350px;
+        }
+
+        .orbit {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid rgba(139, 92, 246, 0.25);
+            border-radius: 50%;
+        }
+
+        .orbit-1 { width: 100%; height: 100%; animation: rotate 25s linear infinite; }
+        .orbit-2 { width: 72%; height: 72%; animation: rotate 18s linear infinite reverse; }
+        .orbit-3 { width: 44%; height: 44%; animation: rotate 12s linear infinite; }
+
+        @keyframes rotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        .orbit-dot {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .central-orb {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, var(--accent-purple), var(--accent-pink));
+            box-shadow: 0 0 50px var(--glow-purple);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .step-content {
+                grid-template-columns: 1fr;
+            }
+
+            .philosophy-content {
+                grid-template-columns: 1fr;
+            }
+
+            .philosophy-visual {
+                height: 350px;
+                order: -1;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .floating-nav {
+                display: none;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            section {
+                padding: 4rem 1.5rem;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .cta-group {
+                flex-direction: column;
+                width: 100%;
+                max-width: 300px;
+                margin: 2rem auto 0;
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .pipeline-step {
+                padding: 2rem 1.5rem;
+            }
+
+            .step-number {
+                left: 1.5rem;
+            }
+
+            .demo-container {
+                padding: 1.5rem;
+            }
+
+            .galaxy-canvas {
+                height: 400px;
+            }
+
+            .philosophy-text {
+                padding: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Component -->
+    <script src="nav-component.js"></script>
+    <canvas class="bg-canvas" id="bg-canvas"></canvas>
+
+    <!-- Floating Navigation -->
+    <nav class="floating-nav">
+        <div class="nav-dot active" data-section="0" data-label="Welcome"></div>
+        <div class="nav-dot" data-section="1" data-label="The Journey"></div>
+        <div class="nav-dot" data-section="2" data-label="Live Demo"></div>
+        <div class="nav-dot" data-section="3" data-label="Gallery"></div>
+        <div class="nav-dot" data-section="4" data-label="Philosophy"></div>
+    </nav>
+
+    <div class="content-wrapper">
+        <!-- Hero Section -->
+        <section id="section-0" class="hero">
+            <div class="section-content">
+                <div class="hero-orb-container">
+                    <div class="hero-orb"></div>
+                </div>
+                <h1>From Raw Data<br>to Living Art</h1>
+                <p class="tagline">An Interactive Journey Through Data Visualization</p>
+                <p class="sub-tagline">Exploring how 9,998 unstructured activity records become 18+ beautiful, insightful visualizations</p>
+                <div class="cta-group">
+                    <a href="#section-1" class="cta-button">
+                        <span>Begin the Journey</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                    <a href="index.html" class="cta-button secondary">
+                        <span>Jump to Full Experience</span>
+                    </a>
+                </div>
+                <div class="scroll-prompt">
+                    <span>Scroll to explore the transformation</span>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12l7 7 7-7"/>
+                    </svg>
+                </div>
+            </div>
+        </section>
+
+        <!-- Data Journey Section -->
+        <section id="section-1" class="data-journey">
+            <div class="section-content">
+                <div class="section-header">
+                    <span class="section-number">Chapter I: The Transformation</span>
+                    <h2 class="journey-title">The Data Pipeline</h2>
+                    <p class="journey-subtitle">From messy JSON exports to multidimensional art—every dataset tells a story when you know how to listen</p>
+                </div>
+
+                <div class="pipeline-container">
+                    <!-- Step 1: Raw Data -->
+                    <div class="pipeline-step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <div class="step-visual">
+<pre>{
+  "header": "YouTube",
+  "title": "Watched How to Build...",
+  "titleUrl": "https://youtube.com/...",
+  "time": "2024-12-24T22:35:14Z",
+  "products": ["YouTube"],
+  "description": "Watched video..."
+}</pre>
+                            </div>
+                            <div class="step-description">
+                                <h3>Raw, Unstructured Data</h3>
+                                <p>It begins with reality: 9,998 Google Activity records exported from Takeout. Messy timestamps, scattered product names, fragmented titles and descriptions. This is real-world data in its natural chaos—the kind that makes analysis both challenging and deeply rewarding. Each record is a moment in time, a digital breadcrumb of human behavior.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-arrow">↓</div>
+
+                    <!-- Step 2: Feature Engineering -->
+                    <div class="pipeline-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <div class="step-visual">
+<pre>Feature extraction pipeline:
+━━━━━━━━━━━━━━━━━━━━━━━
+• 212 products (one-hot)
+• 7 action types
+• Hour of day (0-23)
+• Day of week (0-6)
+• 100 TF-IDF text features
+━━━━━━━━━━━━━━━━━━━━━━━
+Output: 9,998 × 352 matrix
+Sparsity: 94% (typical)</pre>
+                            </div>
+                            <div class="step-description">
+                                <h3>Engineering Meaning from Text</h3>
+                                <p>The transformation begins. Text becomes numbers through careful encoding: one-hot for categorical data, TF-IDF for semantic content, temporal extraction for patterns. What was scattered JSON is now a 352-dimensional feature space—each event a precise point in abstract mathematical space, ready for analysis.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-arrow">↓</div>
+
+                    <!-- Step 3: Dimensionality Reduction -->
+                    <div class="pipeline-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <div class="step-visual">
+<pre>PCA decomposition:
+━━━━━━━━━━━━━━━━━━━━━━━
+PC1:   1.6% variance ██
+PC2:   1.2% variance ██
+PC3:   1.1% variance █
+PC4:   1.0% variance █
+PC5:   0.9% variance █
+...
+PC50:  0.2% variance █
+━━━━━━━━━━━━━━━━━━━━━━━
+Total: 26.3% preserved
+352D → 50D compression</pre>
+                            </div>
+                            <div class="step-description">
+                                <h3>Compressing Complexity</h3>
+                                <p>Principal Component Analysis distills 352 dimensions into 50, preserving 26.3% of variance while making the data tractable. This isn't loss—it's focus. Like a sculptor removing marble to reveal form, PCA removes noise to reveal signal, keeping what matters most for pattern recognition.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-arrow">↓</div>
+
+                    <!-- Step 4: Clustering -->
+                    <div class="pipeline-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <div class="step-visual">
+<pre>K-Means clustering (k=10):
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Cluster 0: 6,104 (61.1%)
+  └─ "YouTube Core"
+
+  Cluster 1: 1,377 (13.8%)
+  └─ "YouTube Extended"
+
+  Cluster 2: 1,319 (13.2%)
+  └─ "Search & Discovery"
+
+  Cluster 3: 271 (2.7%)
+  └─ "Web Navigation"
+  ...
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Silhouette score: 0.175
+Quality: Moderate</pre>
+                            </div>
+                            <div class="step-description">
+                                <h3>Discovering Hidden Patterns</h3>
+                                <p>K-Means clustering reveals 10 distinct behavioral archetypes—patterns the algorithm discovered automatically by finding natural groupings in high-dimensional space. From YouTube marathons to AI tool exploration, each cluster tells a story about digital behavior. These aren't arbitrary divisions; they're emergent truths hidden in the data.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="step-arrow">↓</div>
+
+                    <!-- Step 5: Visualization -->
+                    <div class="pipeline-step">
+                        <div class="step-number">5</div>
+                        <div class="step-content">
+                            <div class="step-visual">
+<pre>Rendering techniques:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ 4D tesseract projection
+✓ Quantum probability fields
+✓ Galaxy gravitational sim
+✓ Atomic orbital shells
+✓ Neural network graphs
+✓ Temporal heatmaps
+✓ UMAP manifold learning
+✓ Force-directed layouts
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total: 18+ unique perspectives</pre>
+                            </div>
+                            <div class="step-description">
+                                <h3>Transforming Numbers into Art</h3>
+                                <p>The final metamorphosis: structured data becomes visual experience. Each visualization technique reveals different facets—tesseracts show dimensional relationships, quantum fields illustrate probability, galaxies demonstrate gravitational clustering. What started as JSON is now interactive art, each view a different lens on the same truth.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Live Galaxy Demo -->
+        <section id="section-2" class="galaxy-demo">
+            <div class="section-content">
+                <div class="section-header">
+                    <span class="section-number">Chapter II: Seeing is Believing</span>
+                    <h2 class="journey-title">Live Demonstration</h2>
+                    <p class="journey-subtitle">This is your data—alive, breathing, gravitating. Every particle is one of your 9,998 activities.</p>
+                </div>
+
+                <div class="demo-container">
+                    <div class="canvas-container">
+                        <canvas id="galaxy-canvas" class="galaxy-canvas"></canvas>
+                    </div>
+                    <div class="demo-controls">
+                        <button class="control-btn active" id="galaxy-spiral">
+                            <span>🌀 Spiral Formation</span>
+                        </button>
+                        <button class="control-btn" id="galaxy-ellipse">
+                            <span>⭕ Elliptical Cluster</span>
+                        </button>
+                        <button class="control-btn active" id="galaxy-rotate">
+                            <span>🔄 Auto-Rotate</span>
+                        </button>
+                    </div>
+                    <p class="demo-description">
+                        Watch the raw JSON from Step 1 transformed into a living galaxy. Eight behavioral clusters form gravitational centers, pulling related activities into orbital patterns. The colors represent different clusters—midnight blue for YouTube dominance, emerald for search behavior, violet for AI tools. This isn't just a visualization; it's your digital DNA visualized as cosmic choreography.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Visualization Gallery -->
+        <section id="section-3" class="viz-gallery">
+            <div class="section-content">
+                <div class="section-header">
+                    <span class="section-number">Chapter III: The Gallery</span>
+                    <h2 class="journey-title">18 Ways to See Data</h2>
+                    <p class="journey-subtitle">Every visualization reveals different insights. Choose your perspective.</p>
+                </div>
+
+                <div class="gallery-grid">
+                    <a href="index.html#tesseract" class="viz-card">
+                        <div class="viz-preview">🌀</div>
+                        <div class="viz-info">
+                            <h3>4D Tesseract</h3>
+                            <p>Rotating hypercube projection mapping 10 clusters onto 4D vertices. Watch behavioral patterns orbit through higher-dimensional space, revealing relationships invisible in 2D or 3D.</p>
+                            <span class="viz-badge">50 Dimensions</span>
+                        </div>
+                    </a>
+
+                    <a href="index.html#quantum" class="viz-card">
+                        <div class="viz-preview">🔬</div>
+                        <div class="viz-info">
+                            <h3>Quantum Probability Field</h3>
+                            <p>Activity events visualized as wave functions in probability space. Toggle between wave and particle modes to experience quantum-inspired data duality.</p>
+                            <span class="viz-badge">Wave-Particle</span>
+                        </div>
+                    </a>
+
+                    <a href="index.html#galaxy" class="viz-card">
+                        <div class="viz-preview">🌌</div>
+                        <div class="viz-info">
+                            <h3>Galaxy Spiral</h3>
+                            <p>Gravitational clustering simulation where events orbit their cluster centroids like stars in a galaxy. Particle trails show behavioral trajectories over time.</p>
+                            <span class="viz-badge">Physics Simulation</span>
+                        </div>
+                    </a>
+
+                    <a href="index.html#atomic" class="viz-card">
+                        <div class="viz-preview">⚛️</div>
+                        <div class="viz-info">
+                            <h3>Atomic Orbital Shell</h3>
+                            <p>Product density visualized as electron cloud probability distributions. Concentric shells represent feature importance across orbital energy levels.</p>
+                            <span class="viz-badge">Orbital Mechanics</span>
+                        </div>
+                    </a>
+
+                    <a href="index.html#neural" class="viz-card">
+                        <div class="viz-preview">🧠</div>
+                        <div class="viz-info">
+                            <h3>Neural Transition Web</h3>
+                            <p>Product transitions as synaptic connections with propagating signals. Watch your behavioral pathways light up like neurons firing across a digital brain.</p>
+                            <span class="viz-badge">Network Graph</span>
+                        </div>
+                    </a>
+
+                    <a href="hyperdimensional-viz/index.html" class="viz-card">
+                        <div class="viz-preview">📊</div>
+                        <div class="viz-info">
+                            <h3>Parallel Coordinates</h3>
+                            <p>View all 352 original dimensions simultaneously. Filter by cluster to see how features correlate across different behavioral modes in real-time.</p>
+                            <span class="viz-badge">352D View</span>
+                        </div>
+                    </a>
+
+                    <a href="hyperdimensional-viz/index.html" class="viz-card">
+                        <div class="viz-preview">🔥</div>
+                        <div class="viz-info">
+                            <h3>Temporal Heatmap</h3>
+                            <p>Activity intensity mapped across hours and days. Discover peak usage times, weekly rhythms, and the circadian patterns of digital behavior.</p>
+                            <span class="viz-badge">Time Analysis</span>
+                        </div>
+                    </a>
+
+                    <a href="hyperdimensional-viz/index.html" class="viz-card">
+                        <div class="viz-preview">🔮</div>
+                        <div class="viz-info">
+                            <h3>UMAP Projection</h3>
+                            <p>Non-linear dimensionality reduction with animated morphing. Watch as clusters reorganize in real-time, revealing the manifold structure of behavior space.</p>
+                            <span class="viz-badge">Manifold Learning</span>
+                        </div>
+                    </a>
+
+                    <a href="hyperdimensional-viz/index.html" class="viz-card">
+                        <div class="viz-preview">🔗</div>
+                        <div class="viz-info">
+                            <h3>Chord Diagram</h3>
+                            <p>Circular flow visualization showing transitions between product categories. Arc thickness represents transition frequency—the thicker the arc, the stronger the behavioral connection.</p>
+                            <span class="viz-badge">Flow Analysis</span>
+                        </div>
+                    </a>
+
+                    <a href="hyperdimensional-viz/ultimate-explorer.html" class="viz-card featured">
+                        <div class="viz-preview">✨</div>
+                        <div class="viz-info">
+                            <h3>+ 9 More Perspectives</h3>
+                            <p>Spectral flow, time waves, PCA manifolds, radar charts, ridge plots, radial trees, force-directed networks, and more. Every angle reveals new insights.</p>
+                            <span class="viz-badge">Ultimate Explorer →</span>
+                        </div>
+                    </a>
+                </div>
+
+                <div style="text-align: center; margin-top: 4rem;">
+                    <a href="index.html" class="cta-button">
+                        <span>Explore All 18+ Visualizations</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Philosophy Section -->
+        <section id="section-4" class="philosophy-section compact">
+            <div class="section-content">
+                <div class="section-header">
+                    <span class="section-number">Epilogue</span>
+                    <h2 class="journey-title" style="background: linear-gradient(135deg, var(--accent-purple), var(--accent-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">The Philosophy</h2>
+                    <p class="journey-subtitle">Why visualize data this way? Because numbers alone don't tell the story.</p>
+                </div>
+
+                <div class="philosophy-content">
+                    <div class="philosophy-text">
+                        <h2>Data as Art</h2>
+                        <p><strong>Data visualization is not just analysis—it's storytelling, discovery, and ultimately, creative expression.</strong></p>
+
+                        <p>Every dataset contains hidden patterns, unexpected beauty, and contextual insights waiting to be revealed. The challenge isn't just making charts—it's finding the right metaphors, perspectives, and interactions that transform raw numbers into genuine understanding.</p>
+
+                        <p>From quantum fields to galaxy spirals, each visualization here explores a different way of <em>seeing</em> high-dimensional space. Some are analytical (parallel coordinates, heatmaps), some are metaphorical (tesseracts, atomic shells), but all treat data with the respect and creativity it deserves.</p>
+
+                        <p><strong>Because the story your data tells is as important as the data itself.</strong> And sometimes, to understand the truth hidden in 352 dimensions, you need to see it dance.</p>
+
+                        <div class="cta-group" style="justify-content: flex-start; margin-top: 2.5rem;">
+                            <a href="README.md" class="cta-button secondary">Read Technical Docs</a>
+                            <a href="index.html" class="cta-button">Start Exploring</a>
+                        </div>
+                    </div>
+
+                    <div class="philosophy-visual">
+                        <div class="orbit-container">
+                            <div class="orbit orbit-1">
+                                <div class="orbit-dot" style="background: var(--accent-purple); box-shadow: 0 0 25px var(--accent-purple);"></div>
+                            </div>
+                            <div class="orbit orbit-2">
+                                <div class="orbit-dot" style="background: var(--accent-pink); box-shadow: 0 0 25px var(--accent-pink);"></div>
+                            </div>
+                            <div class="orbit orbit-3">
+                                <div class="orbit-dot" style="background: var(--accent-cyan); box-shadow: 0 0 25px var(--accent-cyan);"></div>
+                            </div>
+                            <div class="central-orb"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="galaxy.js"></script>
+    <script src="portfolio-enhancements.js"></script>
+    <script>
+        // Enhanced background particles with better performance
+        const bgCanvas = document.getElementById('bg-canvas');
+        const bgCtx = bgCanvas.getContext('2d');
+
+        function resizeCanvas() {
+            bgCanvas.width = window.innerWidth;
+            bgCanvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+
+        const particles = [];
+        const particleCount = Math.min(120, Math.floor(window.innerWidth / 15));
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * bgCanvas.width;
+                this.y = Math.random() * bgCanvas.height;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.radius = Math.random() * 2 + 0.5;
+                this.hue = Math.random() * 60 + 250;
+                this.opacity = Math.random() * 0.5 + 0.3;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > bgCanvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > bgCanvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                bgCtx.beginPath();
+                bgCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                bgCtx.fillStyle = `hsla(${this.hue}, 70%, 60%, ${this.opacity})`;
+                bgCtx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateBackground() {
+            bgCtx.fillStyle = 'rgba(10, 10, 15, 0.08)';
+            bgCtx.fillRect(0, 0, bgCanvas.width, bgCanvas.height);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // Connect nearby particles
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 140) {
+                        bgCtx.beginPath();
+                        bgCtx.moveTo(particles[i].x, particles[i].y);
+                        bgCtx.lineTo(particles[j].x, particles[j].y);
+                        const opacity = 0.12 * (1 - dist / 140);
+                        bgCtx.strokeStyle = `rgba(139, 92, 246, ${opacity})`;
+                        bgCtx.lineWidth = 1;
+                        bgCtx.stroke();
+                    }
+                }
+            }
+
+            requestAnimationFrame(animateBackground);
+        }
+
+        animateBackground();
+
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(resizeCanvas, 250);
+        });
+
+        // Floating navigation with intersection observer
+        const sections = document.querySelectorAll('section');
+        const navDots = document.querySelectorAll('.nav-dot');
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '-50% 0px',
+            threshold: 0
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const index = Array.from(sections).indexOf(entry.target);
+                    navDots.forEach((dot, i) => {
+                        dot.classList.toggle('active', i === index);
+                    });
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => observer.observe(section));
+
+        navDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                sections[index]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
+
+        // Smooth scroll for all anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        });
+
+        // Initialize galaxy visualization
+        let galaxyViz;
+        window.addEventListener('load', () => {
+            try {
+                galaxyViz = new GalaxyViz('galaxy-canvas');
+            } catch (e) {
+                console.warn('Galaxy visualization initialization delayed');
+            }
+        });
+
+        // Performance optimization: pause animations when not visible
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                // Pause heavy animations when tab is hidden
+            }
+        });
+    </script>
+</body>
+</html>
