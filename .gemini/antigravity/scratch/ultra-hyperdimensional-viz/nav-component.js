@@ -5,7 +5,7 @@ const NAVIGATION_PAGES = [
     {
         id: 'portfolio',
         title: 'Portfolio',
-        path: 'portfolio.html',
+        path: 'index.html',
         icon: '📊',
         description: 'Data Visualization Journey'
     },
@@ -26,7 +26,7 @@ const NAVIGATION_PAGES = [
     {
         id: 'analytics',
         title: 'Analytics',
-        path: 'index.html',
+        path: 'analytics.html',
         icon: '📈',
         description: 'Activity Analytics Dashboard'
     }
@@ -42,19 +42,19 @@ class NavigationComponent {
         const path = window.location.pathname;
         const filename = path.split('/').pop();
 
-        if (filename === 'portfolio.html' || filename === '') return 'portfolio';
+        // Portfolio is now index.html (landing page)
+        if (filename === 'index.html' || filename === '') return 'portfolio';
+
+        // Analytics is now analytics.html
+        if (filename === 'analytics.html') return 'analytics';
 
         // Check if we're in the hyperdimensional-viz subfolder
         if (path.includes('hyperdimensional-viz/')) {
             if (filename === 'hyperdimensional-explorer-standalone.html') return 'explorer';
             if (filename === 'ultimate-explorer.html') return 'ultimate';
-            if (filename === 'index.html') return 'analytics'; // There's also an index.html in subfolder
         }
 
-        // Root level files
-        if (filename === 'index.html') return 'analytics';
-
-        return 'analytics'; // default
+        return 'portfolio'; // default to portfolio
     }
 
     init() {
